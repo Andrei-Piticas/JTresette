@@ -9,7 +9,11 @@ public class JTresette {
         StatisticheRep rep = new StatisticheRep();
         Statistiche stat = rep.loadStats();
             javax.swing.SwingUtilities.invokeLater(() -> {
-                new MainMenu(stat,rep).setVisible(true);
+                try {
+                    new MainMenu(stat,rep).setVisible(true);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             });
     }
 }

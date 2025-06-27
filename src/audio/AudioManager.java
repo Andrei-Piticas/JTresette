@@ -23,7 +23,7 @@ public class AudioManager {
         try (InputStream in = new BufferedInputStream(new FileInputStream(filename))) {
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(in);
             bgClip = AudioSystem.getClip();
-            bgClip.open(audioIn);
+           // bgClip.open(audioIn);
             bgClip.loop(Clip.LOOP_CONTINUOUSLY);
 
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {

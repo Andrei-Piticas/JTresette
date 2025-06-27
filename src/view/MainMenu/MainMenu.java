@@ -49,7 +49,7 @@ public class MainMenu extends JFrame {
     }
 
 
-    public MainMenu(Statistiche stat, StatisticheRep repo) {
+    public MainMenu(Statistiche stat, StatisticheRep repo) throws Exception {
         super("JTresette");
         this.stat = stat;
         this.repo = repo;

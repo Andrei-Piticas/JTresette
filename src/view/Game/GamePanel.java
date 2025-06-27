@@ -1,129 +1,129 @@
 package view.Game;
+
+import model.carta.Carta;
 import jtresette.GiocatoreUmano;
 import jtresette.Giocatore;
-import model.Statistiche;
-import model.carta.Carta;
 import opponent.BotPlayer;
-import services.StatisticheRep;
+import model.Statistiche;
 import jtresette.Partita2v2;
+import services.StatisticheRep;
 import view.GameUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URL;
 import java.util.List;
 
-public class GamePanel extends JPanel implements GameUI  {
+public class GamePanel extends JPanel implements GameUI {
     private final Image backgroundGame;
     private final Partita2v2 partita;
     private final JPanel tablePanel;
-    private final JPanel handPanel;
-    private final java.util.List<Giocatore> players;
-    private int roundNumero = 0 ;
+    private final HandPanel handPanel;
+    private final JLabel labelScoreA;
+    private final JLabel labelScoreB;
+    private final JLabel statusLabel;
 
-
-
-    @Override
-    public Carta promptGiocaCarta(List<Carta> mano, List<Carta> tavolo) {
-        // placeholder: restituisco sempre la prima carta
-        return mano.get(0);
-    }
-
-
-
-    public GamePanel(CardLayout cards , JPanel cardHolder , Statistiche stat , StatisticheRep rep, Image backgroundGame, List<Giocatore> players){
+    public GamePanel(CardLayout cards, JPanel cardHolder,
+                     Statistiche stat, StatisticheRep repo, Image backgroundGame) {
         this.backgroundGame = backgroundGame;
-        this.players = players;
         setLayout(new BorderLayout());
+        setOpaque(false);
 
+        // Top bar: back button, status and score
+        JButton backButton = createBackButton(cards, cardHolder);
+        labelScoreA = createLabel("Squadra A: 0");
+        labelScoreB = createLabel("Squadra B: 0");
+        statusLabel = createLabel("Benvenuto!");
 
-        List<Giocatore> players = List.of(new GiocatoreUmano(this) , new BotPlayer() , new GiocatoreUmano(this), new BotPlayer());
+        JPanel scorePanel = new JPanel(new GridLayout(2, 1));
+        scorePanel.setOpaque(false);
+        scorePanel.add(labelScoreA);
+        scorePanel.add(labelScoreB);
 
-        partita  = new Partita2v2(players);
-        partita.inizio();
-
-        // ─── TABLE PANEL ───
-        tablePanel = new JPanel(new GridLayout(1, 4, 10, 0));
-        tablePanel.setOpaque(false);
-        add(tablePanel, BorderLayout.CENTER);
-
-// ─── HAND PANEL ───
-        handPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        handPanel.setOpaque(false);
-        add(handPanel, BorderLayout.SOUTH);
-
-
-        popolaMano
-
-
-        // disegno le carte del Giocatore 1
-        List<Carta> mano = partita.getGiocatori().get(0).getCarte();
-        for (Carta c : mano) {
-            // carica l’icona della carta (adatta il path/file)
-            ImageIcon cardIcon = new ImageIcon(
-                    getClass().getResource("/images/cards/" + c.getNomeFile())
-            );
-            JButton btn = new JButton(cardIcon);
-            btn.setBorderPainted(false);
-            btn.setContentAreaFilled(false);
-            btn.setFocusPainted(false);
-
-            btn.addActionListener(e -> {
-                // 1) gioca la carta nel modello
-                Carta giocata = partita.giocaTurno();
-                // 2) rimuovi il bottone dalla mano
-                handPanel.remove(btn);
-                handPanel.revalidate();
-                handPanel.repaint();
-                // 3) mostra subito la carta sul tavolo
-                tablePanel.add(new JLabel(new ImageIcon(
-                        getClass().getResource("/images/cards/" + giocata.getNomeFile())
-                )));
-                tablePanel.revalidate();
-                tablePanel.repaint();
-                // 4) TODO: fai giocare automaticamente gli altri 3 e poi eseguiRound()
-            });
-
-            handPanel.add(btn);
-        }
-
-
-
-        // ─── TOP BAR con back + indicatore turno ───
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setOpaque(false);
-
-// back button
-        URL backUrl = getClass().getResource("/images/backButton.png");
-        ImageIcon rawBack = new ImageIcon(backUrl);
-        ImageIcon backIcon = new ImageIcon(
-                rawBack.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH)
-        );
-        JButton backButton = new JButton(backIcon);
-        backButton.setBorderPainted(false);
-        backButton.setContentAreaFilled(false);
-        backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> cards.show(cardHolder, "MENU"));
+        topBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         topBar.add(backButton, BorderLayout.WEST);
-
-// indicatore di turno (placeholder, cambierai in seguito)
-        JLabel turnLabel = new JLabel("Turno di: Giocatore 1", JLabel.CENTER);
-        turnLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-        turnLabel.setForeground(Color.WHITE);
-        turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        topBar.add(turnLabel, BorderLayout.CENTER);
-
+        topBar.add(statusLabel, BorderLayout.CENTER);
+        topBar.add(scorePanel, BorderLayout.EAST);
         add(topBar, BorderLayout.NORTH);
 
+        // Init partita
+        List<Giocatore> roster = List.of(
+                new GiocatoreUmano(this),
+                new BotPlayer(),
+                new BotPlayer(),
+                new BotPlayer()
+        );
+        partita = new Partita2v2(roster);
+        partita.inizio();
 
+        // Panels for bots: north, west, east
+        add(createBotPanel(roster.get(1), "Bot NORD"), BorderLayout.NORTH);
+        add(createBotPanel(roster.get(2), "Bot OVEST"), BorderLayout.WEST);
+        add(createBotPanel(roster.get(3), "Bot EST"), BorderLayout.EAST);
 
+        // Table panel
+        tablePanel = new JPanel(new GridLayout(1, 4, 10, 0));
+        tablePanel.setOpaque(false);
+        tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(tablePanel, BorderLayout.CENTER);
 
+        // Hand panel
+        handPanel = new HandPanel(partita.getGiocatori().get(0).getCarte());
+        add(handPanel, BorderLayout.SOUTH);
+    }
+
+    private JLabel createLabel(String text) {
+        JLabel lbl = new JLabel(text, SwingConstants.CENTER);
+        lbl.setFont(lbl.getFont().deriveFont(Font.BOLD, 14f));
+        lbl.setForeground(Color.WHITE);
+        return lbl;
+    }
+
+    private JButton createBackButton(CardLayout cards, JPanel cardHolder) {
+        JButton btn = new JButton("<- Indietro");
+        btn.setBorderPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.addActionListener(e -> cards.show(cardHolder, "MENU"));
+        return btn;
+    }
+
+    private JPanel createBotPanel(Giocatore bot, String title) {
+        JPanel p = new JPanel();
+        p.setOpaque(false);
+        p.setPreferredSize(new Dimension(120, 80));
+        p.add(new JLabel(title));
+        // qui si può aggiungere icona o info del bot
+        return p;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         g.drawImage(backgroundGame, 0, 0, getWidth(), getHeight(), this);
+    }
+
+    @Override
+    public Carta promptGiocaCarta(List<Carta> mano, List<Carta> tavolo) {
+        // logica minima: gioca prima carta
+        return mano.get(0);
+    }
+
+    // Semplice pannello mano utente
+    private static class HandPanel extends JPanel {
+        public HandPanel(List<Carta> mano) {
+            setOpaque(false);
+            setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
+            for (Carta c : mano) {
+                ImageIcon icon = new ImageIcon(
+                        getClass().getResource("/images/carte/" + c.getNomeFile())
+                );
+                JButton btn = new JButton(icon);
+                btn.setBorderPainted(false);
+                btn.setContentAreaFilled(false);
+                btn.addActionListener(e -> {/* TODO: logica gioco */});
+                add(btn);
+            }
+        }
     }
 }
