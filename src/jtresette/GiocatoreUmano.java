@@ -16,27 +16,31 @@ public class GiocatoreUmano implements Giocatore {
 
     @Override
     public void riceviCarta(Carta c) {
-        // quando il mazzo distribuisce, memorizzo la carta nella mia mano
         mano.add(c);
     }
 
     @Override
+    public Carta giocaCarta(List<Carta> tavolo) {
+        // chiedo alla GUI quale carta vuole giocare
+        Carta scelta = ui.promptGiocaCarta(new ArrayList<>(mano), tavolo);
+        // la rimuovo definitivamente dalla mia mano
+        mano.remove(scelta);
+        return scelta;
+    }
+
+    @Override
     public List<Carta> getCarte() {
-        // restituisco una copia per sicurezza
         return new ArrayList<>(mano);
     }
 
     @Override
     public Carta giocaCarta() {
-        return null;
+        // delega, se mai fosse invocato
+        return giocaCarta(List.of());
     }
 
     @Override
-    public Carta giocaCarta(List<Carta> tavolo) {
-        // chiedo alla GUI quale carta vuoi giocare
-        Carta scelta = ui.promptGiocaCarta(new ArrayList<>(mano), tavolo);
-        // rimuovo la carta dalla mia mano interna
-        mano.remove(scelta);
-        return scelta;
+    public Carta giocaCarta(List<Carta> carte, List<Carta> tavolo) {
+        return null;
     }
 }

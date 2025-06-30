@@ -21,25 +21,27 @@ public class BotPlayer implements Giocatore {
 
     @Override
     public Carta giocaCarta(List<Carta> tavolo) {
-
-        Seme semeGuida = tavolo.isEmpty()? null : tavolo.get(0).seme();
-
+        Seme semeGuida = tavolo.isEmpty() ? null : tavolo.get(0).seme();
         List<Carta> cartePossibili = mano.getCarte().stream()
-                .filter(carta -> semeGuida == null || carta.seme() == semeGuida)
+                .filter(c -> semeGuida == null || c.seme() == semeGuida)
                 .toList();
-
-        if (cartePossibili.isEmpty()){
+        if (cartePossibili.isEmpty()) {
             cartePossibili = mano.getCarte();
         }
 
         Mano manoTemp = new Mano(cartePossibili);
-        Carta scelta = strategia.scegliCarta(manoTemp , tavolo);
+        Carta scelta = strategia.scegliCarta(manoTemp, tavolo);
 
+        // *** NUOVO: fallback se la strategia restituisce null ***
+        if (scelta == null) {
+            // prendi semplicemente la prima carta disponibile
+            scelta = cartePossibili.get(0);
+        }
 
         mano.gioca(scelta);
         return scelta;
-
     }
+
 
     @Override
     public List<Carta> getCarte() {
@@ -49,5 +51,10 @@ public class BotPlayer implements Giocatore {
     @Override
     public Carta giocaCarta() {
         return null;
+    }
+
+    @Override
+    public Carta giocaCarta(List<Carta> carte, List<Carta> tavolo) {
+        return giocaCarta(tavolo);
     }
 }
