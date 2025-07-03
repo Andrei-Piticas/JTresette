@@ -55,68 +55,37 @@ public class Partita2v2 {
     }
 
     public int eseguiRound() {
-        // ① debug e salva chi apre
         System.out.println("⏺ eseguiRound #" + contaRound + " startIndex=" + turnoIndex);
         lastStartIndex = turnoIndex;
 
-        List<Carta> tavoloRound = new ArrayList<>(4);
-        List<Integer> pos         = new ArrayList<>(4);
+        List<Integer> order = new ArrayList<>(4);
+        tavolo.clear();
 
-        // ② ciascun giocatore in ordine
         for (int i = 0; i < 4; i++) {
             int idx = turnoIndex;
-            Giocatore g = giocatori.get(idx);
-
-            // prendi la mano corrente e prova a giocare
-            List<Carta> mano = g.getCarte();
-            Carta c = null;
-            if (!mano.isEmpty()) {
-                c = g.giocaCarta(new ArrayList<>(tavoloRound));
-                if (c == null) {
-                    // fallback immediato
-                    System.err.println("⚠️ Giocatore " + idx + " ha restituito null, uso fallback");
-                    c = mano.get(0);
-                }
-
-                // rispetto del seme di apertura
-                Seme semeGuida = tavoloRound.isEmpty() ? null : tavoloRound.get(0).seme();
-                if (semeGuida != null) {
-                    boolean haSeme = mano.stream()
-                            .anyMatch(x -> x.seme() == semeGuida);
-                    if (haSeme && c.seme() != semeGuida) {
-                        // giocata non valida: restituisci e riprova con una carta di seme corretto
-                        g.riceviCarta(c);
-                        c = mano.stream()
-                                .filter(x -> x.seme() == semeGuida)
-                                .findFirst()
-                                .orElse(mano.get(0));
-                    }
-                }
-            }
-
-            if (c == null) {
-                throw new IllegalStateException("Giocatore " + idx + " non aveva carte!");
-            }
-
-            tavoloRound.add(c);
-            pos.add(idx);
-            turnoIndex = (turnoIndex + 1) % 4;
+            giocaTurno();
+            order.add(idx);
         }
 
-        // ③ determina vincitore del round
+        return completaRound(order);
+    }
+
+    /** Calcola vincitore e aggiorna punteggi usando le carte in 'tavolo'. */
+    public int completaRound(List<Integer> order) {
+        if (tavolo.size() != 4) {
+            throw new IllegalStateException("Round incompleto: carte sul tavolo = " + tavolo.size());
+        }
+
+        List<Carta> tavoloRound = new ArrayList<>(tavolo);
         int migliore = 0;
         for (int j = 1; j < 4; j++) {
-            if (tavoloRound.get(j).valore().getRanking() >
-                    tavoloRound.get(migliore).valore().getRanking()) {
+            if (tavoloRound.get(j).valore().getRanking() > tavoloRound.get(migliore).valore().getRanking()) {
                 migliore = j;
             }
         }
-        int vincitore = pos.get(migliore);
+        int vincitore = order.get(migliore);
 
-        // ④ calcola e salva punti
-        float puntiRound = (float) tavoloRound.stream()
-                .mapToDouble(carta -> carta.valore().getPunti())
-                .sum();
+        float puntiRound = (float) tavoloRound.stream().mapToDouble(c -> c.valore().getPunti()).sum();
         this.ultimoVincitore  = vincitore;
         this.puntiUltimoRound = puntiRound;
 
@@ -124,13 +93,11 @@ public class Partita2v2 {
         contaRound++;
         if (contaRound == 10) punteggi[vincitore] += 1f;
 
-        // ⑤ chi apre il prossimo round
         turnoIndex = vincitore;
-
-        // log e salva le carte giocate
+        lastTavoloRound = tavoloRound;
+        lastStartIndex = order.get(0);
+        tavolo.clear();
         System.out.println("   → tavoloRound = " + tavoloRound);
-        this.lastTavoloRound = new ArrayList<>(tavoloRound);
-
         return vincitore;
     }
 
