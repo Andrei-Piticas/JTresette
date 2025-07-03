@@ -30,7 +30,13 @@ public class GamePanel extends JPanel implements GameUI {
     private final JLabel labelScoreB;
     private final JLabel statusLabel;
     private Carta selectedCard;
-    private ImageIcon selectedIcon;
+    private final Map<Integer,String> posMap = Map.of(
+            0, BorderLayout.SOUTH,
+            1, BorderLayout.NORTH,
+            2, BorderLayout.WEST,
+            3, BorderLayout.EAST
+    );
+    private java.util.List<Integer> currentOrder = new java.util.ArrayList<>();
 
     public GamePanel(CardLayout cards, JPanel cardHolder,
                      Statistiche stat, StatisticheRep rep, Image backgroundGame) throws Exception {
@@ -101,6 +107,8 @@ public class GamePanel extends JPanel implements GameUI {
         //handWrapper.setBorder(new LineBorder(Color.YELLOW, 2));
         add(handWrapper, BorderLayout.SOUTH);
 
+        // avvia il primo round
+        startRound();
     }
     /**
      * Il giocatore 'parent' ha scelto di giocare 'c' (con icona 'icon'):
@@ -248,7 +256,10 @@ public class GamePanel extends JPanel implements GameUI {
 
 
     private static class HandPanel extends JPanel {
+        private final GamePanel parent;
+
         public HandPanel(GamePanel parent, List<Carta> mano) {
+            this.parent = parent;
             setOpaque(false);
             setLayout(new FlowLayout(FlowLayout.CENTER, 5, 20));
 
@@ -264,12 +275,8 @@ public class GamePanel extends JPanel implements GameUI {
                     btn.setActionCommand(c.getNomeFile());
                     btn.addActionListener(e -> {
                         parent.selectedCard = c;
-                        try {
-                            parent.executeTurn();
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
                         removeCard(c);
+                        parent.playHumanTurn();
                     });
 
 
@@ -295,6 +302,14 @@ public class GamePanel extends JPanel implements GameUI {
             revalidate();
             repaint();
         }
+
+        public void setButtonsEnabled(boolean enabled) {
+            for (Component comp : getComponents()) {
+                if (comp instanceof JButton btn) {
+                    btn.setEnabled(enabled);
+                }
+            }
+        }
     }
 
     /**
@@ -305,54 +320,81 @@ public class GamePanel extends JPanel implements GameUI {
      */
     // 1) Rimuovi entirely il vecchio executeTurn() e al suo posto inserisci:
 
-    private void executeTurn() throws Exception {
-        tablePanel.removeAll();
+    private void playHumanTurn() {
+        handPanel.setButtonsEnabled(false);
 
-        // 1) Esegui un round completo e prendi chi ha aperto e le carte giocate
-        partita.eseguiRound();
-        int startIndex     = partita.getLastStartIndex();
-        List<Carta> giocate= partita.getLastTavoloRound();
+        int idx = partita.getTurnoIndex();
+        currentOrder.add(idx);
+        Carta c = partita.giocaTurno();
+        try {
+            tablePanel.add(new JLabel(loadIconFor(c), SwingConstants.CENTER), posMap.get(idx));
+        } catch (Exception ex) { ex.printStackTrace(); }
+        tablePanel.revalidate();
+        tablePanel.repaint();
 
-        // 2) Mappatura fissa indice-giocatore → posizione sul BorderLayout
-        Map<Integer,String> posMap = Map.of(
-                0, BorderLayout.SOUTH,   // umano
-                1, BorderLayout.NORTH,   // bot 1
-                2, BorderLayout.WEST,    // partner
-                3, BorderLayout.EAST     // bot 2
-        );
-
-        // 3) Prepara due array paralleli: ordine di visualizzazione e relative icone
-        String[] order     = new String[4];
-        ImageIcon[] icons  = new ImageIcon[4];
-        for (int k = 0; k < 4; k++) {
-            int playerIdx = (startIndex + k) % 4;
-            order[k]     = posMap.get(playerIdx);
-            icons[k]     = loadIconFor(giocate.get(k));
-        }
-
-        // 4) Timer per “sparare” una carta ogni 500 ms
-        Timer timer = new Timer(500, null);
-        timer.addActionListener(new ActionListener() {
-            int idx = 0;
-
+        Timer t = new Timer(500, null);
+        t.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (idx < icons.length) {
-                    tablePanel.add(new JLabel(icons[idx], SwingConstants.CENTER), order[idx]);
+                if (currentOrder.size() < 4) {
+                    int id = partita.getTurnoIndex();
+                    currentOrder.add(id);
+                    Carta card = partita.giocaTurno();
+                    try {
+                        tablePanel.add(new JLabel(loadIconFor(card), SwingConstants.CENTER), posMap.get(id));
+                    } catch (Exception ex) { ex.printStackTrace(); }
                     tablePanel.revalidate();
                     tablePanel.repaint();
-                    idx++;
                 } else {
                     ((Timer)e.getSource()).stop();
-                    // qui puoi anche aggiornare i punteggi a schermo
-                    float pa = Partita2v2.getPunteggio(0) + Partita2v2.getPunteggio(2);
-                    float pb = Partita2v2.getPunteggio(1) + Partita2v2.getPunteggio(3);
-                    labelScoreA.setText("Squadra A: " + pa);
-                    labelScoreB.setText("Squadra B: " + pb);
+                    partita.completaRound(currentOrder);
+                    updateScores();
+                    Timer nx = new Timer(800, ev -> startRound());
+                    nx.setRepeats(false);
+                    nx.start();
                 }
             }
         });
-        timer.setInitialDelay(0);
-        timer.start();
+        t.setInitialDelay(500);
+        t.start();
+    }
+
+    private void startRound() {
+        tablePanel.removeAll();
+        currentOrder.clear();
+
+        if (partita.getTurnoIndex() == 0) {
+            handPanel.setButtonsEnabled(true);
+            return;
+        }
+
+        handPanel.setButtonsEnabled(false);
+        Timer t = new Timer(500, null);
+        t.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (partita.getTurnoIndex() != 0) {
+                    int idx = partita.getTurnoIndex();
+                    currentOrder.add(idx);
+                    Carta card = partita.giocaTurno();
+                    try {
+                        tablePanel.add(new JLabel(loadIconFor(card), SwingConstants.CENTER), posMap.get(idx));
+                    } catch (Exception ex) { ex.printStackTrace(); }
+                    tablePanel.revalidate();
+                    tablePanel.repaint();
+                } else {
+                    ((Timer)e.getSource()).stop();
+                    handPanel.setButtonsEnabled(true);
+                }
+            }
+        });
+        t.setInitialDelay(0);
+        t.start();
+    }
+
+    private void updateScores() {
+        float pa = Partita2v2.getPunteggio(0) + Partita2v2.getPunteggio(2);
+        float pb = Partita2v2.getPunteggio(1) + Partita2v2.getPunteggio(3);
+        labelScoreA.setText("Squadra A: " + pa);
+        labelScoreB.setText("Squadra B: " + pb);
     }
 
 
