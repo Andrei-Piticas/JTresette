@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GiocatoreUmano implements Giocatore {
     private final GameUI ui;
-    private final List<Carta> mano = new ArrayList<>();
+    protected final List<Carta> mano = new ArrayList<>();
 
     public GiocatoreUmano(GameUI ui) {
         this.ui = ui;

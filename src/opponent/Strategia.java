@@ -1,18 +1,19 @@
 package opponent;
 
-import model.Mano;
 import model.carta.Carta;
+import model.Mano;
 import model.carta.Valore;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 public class Strategia {
 
-
-    public Carta scegliCarta(Mano mano, List<Carta> tavolo){
+    public Carta scegliCarta(Mano mano, List<Carta> tavolo) {
         List<Carta> carteMano = mano.getCarte();
+        if (carteMano.isEmpty()) {
+            throw new IllegalStateException("Il bot non ha più carte");
+        }
 
         int miglioreT = tavolo.stream()
                 .map(Carta::valore)
@@ -21,24 +22,17 @@ public class Strategia {
                 .orElse(0);
 
         Optional<Carta> minVittoria = carteMano.stream()
-                .filter(carta -> carta.valore().getRanking() > miglioreT)
-                .min(Comparator.comparing(carta -> carta.valore().getRanking()));
-
-        if (minVittoria.isPresent()){
-            Carta scelta = minVittoria.get();
-
-            return scelta;
-
+                .filter(c -> c.valore().getRanking() > miglioreT)
+                .min(Comparator.comparingInt(c -> c.valore().getRanking()));
+        if (minVittoria.isPresent()) {
+            return minVittoria.get();
         }
 
-        Carta scarto = carteMano.stream()
-                .min(Comparator.comparingDouble(carta -> carta.valore().getPunti()))
-                .orElseThrow();
-
-
-        return scarto;
-
+        // fallback sicuro: scarta la carta con meno punti,
+        // orElse(0) non può più esplodere perché la lista non è vuota
+        return carteMano.stream()
+                .min(Comparator.comparingDouble(c -> c.valore().getPunti()))
+                .orElse(carteMano.get(0));
     }
-            //
 
 }

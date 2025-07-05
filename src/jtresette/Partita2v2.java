@@ -78,13 +78,13 @@ public class Partita2v2 {
                     c = mano.get(0);
                 }
 
-                // rispetto del seme di apertura
+
                 Seme semeGuida = tavoloRound.isEmpty() ? null : tavoloRound.get(0).seme();
-                if (semeGuida != null) {
+                if (!(g instanceof jtresette.GiocatoreUmano) && semeGuida != null) {
                     boolean haSeme = mano.stream()
                             .anyMatch(x -> x.seme() == semeGuida);
                     if (haSeme && c.seme() != semeGuida) {
-                        // giocata non valida: restituisci e riprova con una carta di seme corretto
+                        // enforcement solo per bot
                         g.riceviCarta(c);
                         c = mano.stream()
                                 .filter(x -> x.seme() == semeGuida)
@@ -92,6 +92,8 @@ public class Partita2v2 {
                                 .orElse(mano.get(0));
                     }
                 }
+
+
             }
 
             if (c == null) {
@@ -134,11 +136,28 @@ public class Partita2v2 {
         return vincitore;
     }
 
+    public void determinaPrimoGiocatore() {
+        // Trova il giocatore con la carta più alta
+        int migliore = 0;
+        Carta cartaMigliore = null;
+
+        for (int i = 0; i < 4; i++) {
+            List<Carta> mano = giocatori.get(i).getCarte();
+            for (Carta c : mano) {
+                if (cartaMigliore == null ||
+                        c.valore().getRanking() > cartaMigliore.valore().getRanking()) {
+                    cartaMigliore = c;
+                    migliore = i;
+                }
+            }
+        }
+        // Imposta il turno iniziale
+        turnoIndex = migliore;
+        System.out.println("Primo giocatore: " + migliore);
+    }
+
 
     // ─── GETTER ───
-    public int getUltimoVincitore() {
-        return ultimoVincitore;
-    }
 
     public float getPuntiUltimoRound() {
         return puntiUltimoRound;
@@ -163,14 +182,15 @@ public class Partita2v2 {
         return List.copyOf(tavolo);
     }
 
-
-    public List<Carta> getLastTavoloRound() {
-        return List.copyOf(lastTavoloRound);
+    public int getVincitoreTurno() {
+        return ultimoVincitore;
     }
 
-    /** Restituisce l’indice (0..3) del giocatore che ha aperto l’ultimo round */
     public int getLastStartIndex() {
         return lastStartIndex;
     }
 
+    public List<Carta> getLastTavoloRound() {
+        return List.copyOf(lastTavoloRound);
+    }
 }

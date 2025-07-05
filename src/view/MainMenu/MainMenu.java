@@ -90,7 +90,7 @@ public class MainMenu extends JFrame {
         Image gameBg   = new ImageIcon(gameBgUrl)
                 .getImage()
                 .getScaledInstance(500,500, Image.SCALE_SMOOTH );
-        cardHolder.add(new GamePanel(cards, cardHolder,stat,repo,gameBg), "GAME");
+        cardHolder.add(new GamePanel(), "GAME");
         cardHolder.add(new SettingPanel(cards, cardHolder), "IMPOSTAZIONI");
 
 

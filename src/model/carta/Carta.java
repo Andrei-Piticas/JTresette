@@ -6,4 +6,11 @@ public record Carta(Seme seme,Valore valore) {
     }
 
 
+    public Seme getSeme() {
+        return seme;
+    }
+
+    public Valore getValore() {
+        return valore;
+    }
 }
