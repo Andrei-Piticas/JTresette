@@ -57,4 +57,9 @@ public class BotPlayer implements Giocatore {
     public Carta giocaCarta(List<Carta> carte, List<Carta> tavolo) {
         return giocaCarta(tavolo);
     }
+
+    @Override
+    public String getNome(String nome) {
+        return "Bot";
+    }
 }

@@ -19,6 +19,7 @@ public class MainMenu extends JFrame {
     private boolean isMute = false;
     private final Statistiche stat;
     private final StatisticheRep repo;
+    private GamePanel gamePanel;
 
     private int getPlayerLevel() {
         return 2;
@@ -90,7 +91,8 @@ public class MainMenu extends JFrame {
         Image gameBg   = new ImageIcon(gameBgUrl)
                 .getImage()
                 .getScaledInstance(500,500, Image.SCALE_SMOOTH );
-        cardHolder.add(new GamePanel(), "GAME");
+        gamePanel = new GamePanel();
+        cardHolder.add(gamePanel, "GAME");
         cardHolder.add(new SettingPanel(cards, cardHolder), "IMPOSTAZIONI");
 
 
@@ -198,7 +200,10 @@ public class MainMenu extends JFrame {
         bottGioca.setAlignmentX(Component.CENTER_ALIGNMENT);
         bottImpostazioni.setAlignmentX(Component.CENTER_ALIGNMENT);
         bottEsci.setAlignmentX(Component.CENTER_ALIGNMENT);
-        bottGioca.addActionListener(e -> cards.show(cardHolder, "GAME"));
+        bottGioca.addActionListener(e -> {
+            cards.show(cardHolder, "GAME"); // 1. Mostra il pannello del gioco
+            gamePanel.startNewGame();       // 2. Avvia la partita!
+        });
         bottImpostazioni.addActionListener(e -> cards.show(cardHolder, "IMPOSTAZIONI"));
         bottEsci.addActionListener(e -> System.exit(0));
         for (JButton b : new JButton[]{bottGioca, bottImpostazioni, bottEsci}) {

@@ -13,4 +13,6 @@ public interface Giocatore {
     Carta giocaCarta();
 
     Carta giocaCarta(List<Carta> carte, List<Carta> tavolo);
+
+    String getNome(String nome);
 }

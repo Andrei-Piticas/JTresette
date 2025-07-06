@@ -43,4 +43,11 @@ public class GiocatoreUmano implements Giocatore {
     public Carta giocaCarta(List<Carta> carte, List<Carta> tavolo) {
         return null;
     }
+
+    @Override
+    public String getNome(String nome) {
+        return "Tu";
+    }
+
+
 }
