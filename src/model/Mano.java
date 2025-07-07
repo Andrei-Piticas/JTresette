@@ -47,4 +47,13 @@ public class Mano {
     public List<Carta> getCarte(){
             return List.copyOf(carte);
     }
+
+    // In src/model/Mano.java
+
+    public void svuota() {
+        // Assuming your internal list is named 'carte'
+        this.carte.clear();
+    }
+
+
 }

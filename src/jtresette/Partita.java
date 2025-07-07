@@ -4,10 +4,8 @@ import java.util.List;
 
 public class Partita {
     private final Partita2v2 gioco;
-    private final List<Giocatore> giocatori;
 
     public Partita(List<Giocatore> giocatori) {
-        this.giocatori = giocatori;
         this.gioco = new Partita2v2(giocatori);
     }
 
@@ -15,19 +13,21 @@ public class Partita {
         return this.gioco;
     }
 
+    // Il nuovo ciclo di gioco, orchestrato dalla grafica
     public String eseguiPartita() {
         gioco.inizio();
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 4; j++) {
+
+        for (int i = 0; i < 10; i++) { // 10 round
+            for (int j = 0; j < 4; j++) { // 4 turni per round
                 gioco.giocaTurno();
             }
-            gioco.calcolaPuntiEManoSuccessiva();
+            gioco.finalizzaRound();
+            try { Thread.sleep(1500); } catch (InterruptedException e) {} // Pausa per vedere il tavolo
             gioco.svuotaTavolo();
         }
         return calcolaVincitore();
     }
 
-    // THIS IS A NEW METHOD
     public String calcolaVincitore() {
         float puntiSquadra1 = Partita2v2.getPunteggio(0) + Partita2v2.getPunteggio(2);
         float puntiSquadra2 = Partita2v2.getPunteggio(1) + Partita2v2.getPunteggio(3);
@@ -47,5 +47,4 @@ public class Partita {
             return "Pareggio";
         }
     }
-
 }

@@ -49,5 +49,12 @@ public class GiocatoreUmano implements Giocatore {
         return "Tu";
     }
 
+    // Add this method inside your GiocatoreUmano class
+
+    @Override
+    public void svuotaMano() {
+        this.mano.clear();
+    }
+
 
 }

@@ -8,6 +8,8 @@ public interface Giocatore {
     void riceviCarta(Carta c);
     Carta giocaCarta(List<Carta> tavolo);
     List<Carta> getCarte();
+    void svuotaMano();
+
 
 
     Carta giocaCarta();

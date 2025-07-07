@@ -21,11 +21,16 @@ import java.util.concurrent.ExecutionException;
 
 public class GamePanel extends JPanel implements GameUI {
 
-    private JPanel southPlayerArea, northPlayerArea, westPlayerArea, eastPlayerArea, centerTableArea;
+    // Attributi Grafici
     private final Map<String, ImageIcon> cardImages = new HashMap<>();
     private static final int CARD_WIDTH = 80;
     private static final int CARD_HEIGHT = 125;
 
+    // Aree di Gioco e Mappa per la Corretta Disposizione
+    private JPanel southPlayerArea, northPlayerArea, westPlayerArea, eastPlayerArea, centerTableArea;
+    private Map<Giocatore, JPanel> playerAreaMap;
+
+    // Attributi di Gioco
     private Partita partita;
     private Carta cartaSceltaDallUmano;
     private final Object lock = new Object();
@@ -42,14 +47,27 @@ public class GamePanel extends JPanel implements GameUI {
         this.setBackground(new Color(34, 139, 34));
     }
 
+    // NUOVA LOGICA DI AVVIO PARTITA
     public void startNewGame() {
-        List<Giocatore> giocatori = new ArrayList<>();
-        giocatori.add(new GiocatoreUmano(this));
-        giocatori.add(new BotPlayer());
-        giocatori.add(new BotPlayer());
-        giocatori.add(new BotPlayer());
+        // 1. Crea i singoli giocatori
+        Giocatore umano = new GiocatoreUmano(this);
+        Giocatore botOvest = new BotPlayer();
+        Giocatore botNord = new BotPlayer();
+        Giocatore botEst = new BotPlayer();
 
-        partita = new Partita(giocatori);
+        // 2. Mappa ogni giocatore alla sua area grafica corretta
+        playerAreaMap = new HashMap<>();
+        playerAreaMap.put(umano, southPlayerArea);
+        playerAreaMap.put(botOvest, westPlayerArea);
+        playerAreaMap.put(botNord, northPlayerArea);
+        playerAreaMap.put(botEst, eastPlayerArea);
+
+        // 3. Crea la lista dei giocatori nell'ORDINE DI GIOCO CORRETTO (ANTI-ORARIO)
+        // Sud -> Est -> Nord -> Ovest
+        List<Giocatore> giocatoriInOrdineDiGioco = List.of(umano, botEst, botNord, botOvest);
+
+        // 4. Avvia la partita con la lista ordinata per la logica
+        partita = new Partita(giocatoriInOrdineDiGioco);
         partita.getGioco().setObserver(this);
 
         GameWorker gameWorker = new GameWorker();
@@ -59,26 +77,22 @@ public class GamePanel extends JPanel implements GameUI {
     private class GameWorker extends SwingWorker<String, Void> {
         @Override
         protected String doInBackground() throws Exception {
-            // La logica di gioco originale guida la partita
             return partita.eseguiPartita();
         }
 
         @Override
         protected void done() {
             try {
-                String risultato = get();
-                // A fine partita, usa la logica di calcolo del vincitore
                 String messaggioFinale = partita.calcolaVincitore();
                 JOptionPane.showMessageDialog(GamePanel.this,
                         "Partita terminata!\n" + messaggioFinale,
                         "Fine Partita", JOptionPane.INFORMATION_MESSAGE);
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    // Metodo dall'interfaccia GameUI per ricevere notifiche dalla logica
     @Override
     public void update() {
         SwingUtilities.invokeLater(this::updateGUI);
@@ -87,26 +101,75 @@ public class GamePanel extends JPanel implements GameUI {
     @Override
     public Carta promptGiocaCarta(List<Carta> mano, List<Carta> tavolo) {
         try {
-            // Forza il thread di gioco ad attendere che la grafica sia pronta
             SwingUtilities.invokeAndWait(() -> {
                 updateGUI();
                 enableCardListeners(mano);
             });
-        } catch (InterruptedException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
 
-        // Ora attende in sicurezza il click dell'utente
         synchronized (lock) {
             try {
                 lock.wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         }
         disableCardListeners();
         return cartaSceltaDallUmano;
     }
+
+    // NUOVA LOGICA DI AGGIORNAMENTO GRAFICO
+    public void updateGUI() {
+        if (partita == null || partita.getGioco() == null || playerAreaMap == null) return;
+
+        // Pulisci tutte le aree
+        playerAreaMap.values().forEach(JPanel::removeAll);
+        centerTableArea.removeAll();
+
+        // Disegna le mani dei giocatori nelle loro aree corrette
+        List<Giocatore> giocatoriInGioco = partita.getGioco().getGiocatori();
+        for (Giocatore player : giocatoriInGioco) {
+            JPanel area = playerAreaMap.get(player);
+            if (area != null) {
+                drawPlayerHand(player, area, player instanceof GiocatoreUmano);
+            }
+        }
+
+        drawTable();
+
+        revalidate();
+        repaint();
+    }
+
+    // NUOVA LOGICA PER DISEGNARE IL TAVOLO
+    private void drawTable() {
+        if (partita.getGioco().getTavolo().isEmpty()) return;
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        Partita2v2 gioco = partita.getGioco();
+        List<Carta> carteSulTavolo = gioco.getTavolo();
+        List<Giocatore> giocatoriInLogica = gioco.getGiocatori();
+        int primoGiocatoreIndex = gioco.getLastStartIndex();
+
+        for (int i = 0; i < carteSulTavolo.size(); i++) {
+            Carta carta = carteSulTavolo.get(i);
+            Giocatore giocatoreCheHaGiocato = giocatoriInLogica.get((primoGiocatoreIndex + i) % 4);
+
+            // Determina la posizione grafica basandosi sull'oggetto Giocatore
+            if (giocatoreCheHaGiocato instanceof GiocatoreUmano) {
+                gbc.gridx = 1; gbc.gridy = 2; // Sud
+            } else if (playerAreaMap.get(giocatoreCheHaGiocato) == westPlayerArea) {
+                gbc.gridx = 0; gbc.gridy = 1; // Ovest
+            } else if (playerAreaMap.get(giocatoreCheHaGiocato) == northPlayerArea) {
+                gbc.gridx = 1; gbc.gridy = 0; // Nord
+            } else { // East
+                gbc.gridx = 2; gbc.gridy = 1; // Est
+            }
+            centerTableArea.add(new JLabel(cardImages.get(getCardImageName(carta))), gbc);
+        }
+    }
+
+    // --- METODI ESISTENTI (nessuna modifica necessaria) ---
 
     private void initializePlayerAreas() {
         southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -35, 10));
@@ -125,30 +188,6 @@ public class GamePanel extends JPanel implements GameUI {
         eastPlayerArea.setOpaque(false);
     }
 
-    public void updateGUI() {
-        if (partita == null || partita.getGioco() == null) return;
-
-        southPlayerArea.removeAll();
-        northPlayerArea.removeAll();
-        westPlayerArea.removeAll();
-        eastPlayerArea.removeAll();
-        centerTableArea.removeAll();
-
-        List<Giocatore> giocatoriInGioco = partita.getGioco().getGiocatori();
-
-        if (giocatoriInGioco != null && giocatoriInGioco.size() == 4) {
-            drawPlayerHand(giocatoriInGioco.get(0), southPlayerArea, true);
-            drawPlayerHand(giocatoriInGioco.get(1), westPlayerArea, false);
-            drawPlayerHand(giocatoriInGioco.get(2), northPlayerArea, false);
-            drawPlayerHand(giocatoriInGioco.get(3), eastPlayerArea, false);
-        }
-
-        drawTable();
-
-        revalidate();
-        repaint();
-    }
-
     private void drawPlayerHand(Giocatore player, JPanel area, boolean isHuman) {
         if (player.getCarte() == null) return;
         for (Carta card : player.getCarte()) {
@@ -157,32 +196,6 @@ public class GamePanel extends JPanel implements GameUI {
             if (icon != null) {
                 area.add(new JLabel(icon));
             }
-        }
-    }
-
-    private void drawTable() {
-        if (partita == null || partita.getGioco() == null || partita.getGioco().getTavolo() == null) return;
-
-        Partita2v2 gioco = partita.getGioco();
-        List<Carta> carteSulTavolo = gioco.getTavolo();
-        if (carteSulTavolo.isEmpty()) return;
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        int primoGiocatoreDelTurno = gioco.getLastStartIndex();
-
-        for (int i = 0; i < carteSulTavolo.size(); i++) {
-            Carta carta = carteSulTavolo.get(i);
-            int playerIndex = (primoGiocatoreDelTurno + i) % 4;
-
-            switch (playerIndex) {
-                case 0: gbc.gridx = 1; gbc.gridy = 2; break; // SUD
-                case 1: gbc.gridx = 0; gbc.gridy = 1; break; // OVEST
-                case 2: gbc.gridx = 1; gbc.gridy = 0; break; // NORD
-                case 3: gbc.gridx = 2; gbc.gridy = 1; break; // EST
-            }
-            centerTableArea.add(new JLabel(cardImages.get(getCardImageName(carta))), gbc);
         }
     }
 

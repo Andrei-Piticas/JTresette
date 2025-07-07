@@ -62,4 +62,8 @@ public class BotPlayer implements Giocatore {
     public String getNome(String nome) {
         return "Bot";
     }
+    @Override
+    public void svuotaMano() {
+        this.mano.svuota(); // Or this.mano.clear() if 'mano' is a List
+    }
 }
