@@ -9,6 +9,7 @@ public interface Giocatore {
     Carta giocaCarta(List<Carta> tavolo);
     List<Carta> getCarte();
     void svuotaMano();
+    void setNome(String nome);
 
 
 
@@ -17,4 +18,5 @@ public interface Giocatore {
     Carta giocaCarta(List<Carta> carte, List<Carta> tavolo);
 
     String getNome(String nome);
+    String getNome();
 }

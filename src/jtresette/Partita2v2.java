@@ -93,6 +93,13 @@ public class Partita2v2 {
 
         int vincitore = (this.lastStartIndex + migliore) % 4;
         this.ultimoVincitore = vincitore;
+        if (observer != null) {
+            String nomeVincitore = giocatori.get(vincitore).getNome();
+            // Calcola i punteggi totali delle squadre
+            float puntiSquadra1 = punteggi[0] + punteggi[2];
+            float puntiSquadra2 = punteggi[1] + punteggi[3];
+            observer.mostraRiepilogoMano(nomeVincitore, puntiSquadra1, puntiSquadra2);
+        }
 
         float puntiRound = (float) tavolo.stream().mapToDouble(c -> c.getValore().getPunti()).sum();
         punteggi[vincitore] += puntiRound;

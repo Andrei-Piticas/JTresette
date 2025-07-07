@@ -9,6 +9,12 @@ import java.util.List;
 public class GiocatoreUmano implements Giocatore {
     private final GameUI ui;
     protected final List<Carta> mano = new ArrayList<>();
+    private String nome;
+
+
+
+
+
 
     public GiocatoreUmano(GameUI ui) {
         this.ui = ui;
@@ -54,6 +60,16 @@ public class GiocatoreUmano implements Giocatore {
     @Override
     public void svuotaMano() {
         this.mano.clear();
+    }
+
+    @Override
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+
+    public String getNome() {
+        return this.nome;
     }
 
 

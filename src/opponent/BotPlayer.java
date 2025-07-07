@@ -11,6 +11,7 @@ public class BotPlayer implements Giocatore {
 
     private final Mano mano = new Mano();
     private final Strategia strategia = new Strategia();
+    private String nome;
 
 
 
@@ -65,5 +66,14 @@ public class BotPlayer implements Giocatore {
     @Override
     public void svuotaMano() {
         this.mano.svuota(); // Or this.mano.clear() if 'mano' is a List
+    }
+    @Override
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    @Override
+    public String getNome() {
+        return this.nome;
     }
 }
