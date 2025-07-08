@@ -20,8 +20,9 @@ import java.util.concurrent.ExecutionException;
 
 public class GamePanel extends JPanel implements GameUI {
 
-    // --- ATTRIBUTI PER LA UI ---
-    private RoundSummaryPanel summaryPanel;
+    // --- ATTRIBUTES ---
+    private JLabel scoreLabel;
+    private JLabel messageLabel;
 
     private JPanel southPlayerArea, northPlayerArea, westPlayerArea, eastPlayerArea, centerTableArea;
     private Map<Giocatore, JPanel> playerAreaMap;
@@ -37,15 +38,13 @@ public class GamePanel extends JPanel implements GameUI {
         loadCardImages();
         initializePlayerAreas();
 
-        // Layout di base semplice e funzionante
         this.add(northPlayerArea, BorderLayout.NORTH);
-        this.add(southPlayerArea, BorderLayout.SOUTH);
+        this.add(createSouthContainer(), BorderLayout.SOUTH);
         this.add(westPlayerArea, BorderLayout.WEST);
         this.add(eastPlayerArea, BorderLayout.EAST);
         this.add(centerTableArea, BorderLayout.CENTER);
         this.setBackground(new Color(34, 139, 34));
 
-        // Aggiungi un listener per configurare il glass pane appena il pannello è visibile
         this.addHierarchyListener(e -> {
             if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && this.isShowing()) {
                 setupGlassPane();
@@ -53,110 +52,178 @@ public class GamePanel extends JPanel implements GameUI {
         });
     }
 
-    // --- NUOVO METODO PER CONFIGURARE L'OVERLAY ---
+    private void initializePlayerAreas() {
+        northPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -35, 5));
+        northPlayerArea.setPreferredSize(new Dimension(0, CARD_HEIGHT + 45));
+
+        westPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
+        westPlayerArea.setPreferredSize(new Dimension(CARD_HEIGHT + 20, 0));
+
+        eastPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
+        eastPlayerArea.setPreferredSize(new Dimension(CARD_HEIGHT + 20, 0));
+
+        centerTableArea = new JPanel(new GridBagLayout());
+        centerTableArea.setBackground(new Color(0, 80, 0));
+
+        messageLabel = new JLabel("", SwingConstants.CENTER);
+        messageLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
+        messageLabel.setForeground(Color.YELLOW);
+        messageLabel.setVisible(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 3;
+        centerTableArea.add(messageLabel, gbc);
+
+        northPlayerArea.setOpaque(false);
+        westPlayerArea.setOpaque(false);
+        eastPlayerArea.setOpaque(false);
+    }
+
+    private JPanel createSouthContainer() {
+        JPanel southContainer = new JPanel(new BorderLayout());
+        southContainer.setOpaque(false);
+
+        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -25, 5)); // Aumentata un po' la distanza
+        southPlayerArea.setOpaque(false);
+
+        JPanel scoreContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));
+        scoreContainer.setOpaque(false);
+        scoreContainer.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
+        scoreLabel = new JLabel("Andrei & Borl: 0.00  -  DiegoBot & ThomasBot: 0.00");
+        scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        scoreLabel.setForeground(Color.WHITE);
+        scoreContainer.add(scoreLabel);
+
+        southContainer.add(southPlayerArea, BorderLayout.CENTER);
+        southContainer.add(scoreContainer, BorderLayout.SOUTH);
+
+        return southContainer;
+    }
+
+    // --- Metodo updateGUI() Modificato ---
+
+    public void updateGUI() {
+        if (partita == null || partita.getGioco() == null || playerAreaMap == null) return;
+
+        playerAreaMap.values().forEach(JPanel::removeAll);
+
+        for(Component c : centerTableArea.getComponents()) {
+            if (c instanceof JLabel && ((JLabel)c).getIcon() != null) {
+                centerTableArea.remove(c);
+            }
+        }
+
+        List<Giocatore> giocatoriInGioco = partita.getGioco().getGiocatori();
+
+        if (giocatoriInGioco != null && giocatoriInGioco.size() == 4) {
+            for (int i = 0; i < giocatoriInGioco.size(); i++) {
+                Giocatore player = giocatoriInGioco.get(i);
+                JPanel area = playerAreaMap.get(player);
+
+                if (area != null) {
+                    // 1. Recupera il punteggio individuale del giocatore
+                    float score = Partita2v2.getPunteggio(i);
+                    // 2. Crea la stringa per il titolo (Nome: Punti)
+                    String title = String.format("%s: %.2f", player.getNome(), score);
+
+                    // 3. Crea un TitledBorder con una base trasparente (EmptyBorder)
+                    TitledBorder titledBorder = BorderFactory.createTitledBorder(
+                            BorderFactory.createEmptyBorder(), // Bordo di base invisibile
+                            title,
+                            TitledBorder.CENTER,
+                            TitledBorder.TOP,
+                            new Font("SansSerif", Font.BOLD, 14),
+                            Color.WHITE
+                    );
+
+                    area.setBorder(titledBorder);
+                    drawPlayerHand(player, area, player instanceof GiocatoreUmano);
+                }
+            }
+        }
+
+        drawTable();
+
+        // Aggiorna il punteggio totale di squadra in basso
+        float puntiSquadra1 = Partita2v2.getPunteggio(0) + Partita2v2.getPunteggio(2);
+        float puntiSquadra2 = Partita2v2.getPunteggio(1) + Partita2v2.getPunteggio(3);
+        scoreLabel.setText(String.format("Andrei & Borl: %.2f  -  DiegoBot & ThomasBot: %.2f", puntiSquadra1, puntiSquadra2));
+
+        revalidate();
+        repaint();
+    }
+
+    // --- TUTTI GLI ALTRI METODI RIMANGONO INVARIATI ---
+    // (Il codice seguente è identico a prima, ma lo includo per completezza)
+
     private void setupGlassPane() {
-        // Trova la finestra principale (JFrame) che contiene questo pannello
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (topFrame == null) return;
-
-        // Crea il pannello di riepilogo
-        summaryPanel = new RoundSummaryPanel(cardImages.get("BackPanel"));
-
-        // Prendi il "pannello di vetro" e aggiungici il nostro pannello di riepilogo
+        RoundSummaryPanel summaryPanel = new RoundSummaryPanel(cardImages.get("backpanel"));
         JPanel glassPane = (JPanel) topFrame.getGlassPane();
         glassPane.setLayout(new GridBagLayout());
         glassPane.add(summaryPanel);
-        glassPane.setOpaque(false); // Rendi il glass pane trasparente
+        glassPane.setOpaque(false);
     }
 
-
-    // --- NUOVO METODO IMPLEMENTATO ---
     @Override
     public void mostraRiepilogoMano(String nomeVincitore, float punteggioSquadra1, float punteggioSquadra2) {
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (topFrame == null) return;
+        JPanel glassPane = (JPanel) topFrame.getGlassPane();
+        // Assumiamo che il summaryPanel sia il primo componente del primo componente del glassPane
+        try {
+            Component C = glassPane.getComponent(0);
+            if(C instanceof RoundSummaryPanel){
+                RoundSummaryPanel summaryPanel = (RoundSummaryPanel) C;
+                summaryPanel.updateInfo(nomeVincitore, punteggioSquadra1, punteggioSquadra2);
+                glassPane.setVisible(true);
+                Timer timer = new Timer(2000, e -> glassPane.setVisible(false));
+                timer.setRepeats(false);
+                timer.start();
+            }
 
-        // Aggiorna le informazioni e rendi visibile il pannello di vetro
-        summaryPanel.updateInfo(nomeVincitore, punteggioSquadra1, punteggioSquadra2);
-        topFrame.getGlassPane().setVisible(true);
-
-        // Usa un Timer per nascondere il glass pane dopo 2 secondi
-        Timer timer = new Timer(2000, e -> topFrame.getGlassPane().setVisible(false));
-        timer.setRepeats(false);
-        timer.start();
+        } catch (Exception e) {
+            System.err.println("Errore nel trovare il summary panel.");
+        }
     }
 
-
-    // --- INNER CLASS PER IL PANNELLO DI RIEPILOGO (invariata) ---
     private class RoundSummaryPanel extends JPanel {
         private JLabel winnerLabel;
         private JLabel scoreLabel;
-        private ImageIcon background;
+        private Image background;
 
         public RoundSummaryPanel(ImageIcon bg) {
-            this.background = bg;
-            this.setLayout(new GridBagLayout());
+            if (bg != null) this.background = bg.getImage();
+            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            this.setPreferredSize(new Dimension(450, 220));
+            this.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
             this.setOpaque(false);
 
-
-            JPanel contentPanel = new JPanel() {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    if (background != null) {
-                        g.drawImage(background.getImage(), 0, 0, this.getWidth(), this.getHeight(), this);
-                    }
-                }
-            };
-            contentPanel.setOpaque(false);
-            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-            contentPanel.setPreferredSize(new Dimension(480, 320));
-            contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-
             winnerLabel = new JLabel("Mano vinta da: ", SwingConstants.CENTER);
-            winnerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-            winnerLabel.setForeground(Color.WHITE);
+            winnerLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
+            winnerLabel.setForeground(Color.YELLOW);
             winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
             scoreLabel = new JLabel("Punteggi:", SwingConstants.CENTER);
-            scoreLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            scoreLabel.setFont(new Font("SansSerif", Font.PLAIN, 22));
             scoreLabel.setForeground(Color.WHITE);
             scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            this.add(Box.createVerticalGlue());
+            this.add(winnerLabel);
+            this.add(Box.createRigidArea(new Dimension(0, 15)));
+            this.add(scoreLabel);
+            this.add(Box.createVerticalGlue());
+        }
 
-            contentPanel.add(Box.createVerticalGlue());
-            contentPanel.add(winnerLabel);
-            contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-            contentPanel.add(scoreLabel);
-            contentPanel.add(Box.createVerticalGlue());
-
-            this.add(contentPanel);
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (background != null) g.drawImage(background, 0, 0, this.getWidth(), this.getHeight(), this);
         }
 
         public void updateInfo(String winnerName, float score1, float score2) {
             winnerLabel.setText("Mano vinta da: " + winnerName);
             scoreLabel.setText(String.format("Andrei & Borl: %.2f  -  DiegoBot & ThomasBot: %.2f", score1, score2));
         }
-    }
-
-
-    // --- TUTTO IL RESTO DEL CODICE RIMANE IDENTICO ---
-
-    private void initializePlayerAreas() {
-        northPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -35, 5));
-        northPlayerArea.setPreferredSize(new Dimension(0, CARD_HEIGHT + 45));
-        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -10, 5));
-        southPlayerArea.setPreferredSize(new Dimension(0, CARD_HEIGHT + 45));
-        westPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
-        westPlayerArea.setPreferredSize(new Dimension(CARD_HEIGHT + 20, 0));
-        eastPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
-        eastPlayerArea.setPreferredSize(new Dimension(CARD_HEIGHT + 20, 0));
-        centerTableArea = new JPanel(new GridBagLayout());
-        centerTableArea.setBackground(new Color(0, 80, 0));
-        northPlayerArea.setOpaque(false);
-        southPlayerArea.setOpaque(false);
-        westPlayerArea.setOpaque(false);
-        eastPlayerArea.setOpaque(false);
     }
 
     public void startNewGame() {
@@ -224,37 +291,6 @@ public class GamePanel extends JPanel implements GameUI {
         }
         disableCardListeners();
         return cartaSceltaDallUmano;
-    }
-
-    public void updateGUI() {
-        if (partita == null || partita.getGioco() == null || playerAreaMap == null) return;
-
-        playerAreaMap.values().forEach(JPanel::removeAll);
-
-        for(Component c : centerTableArea.getComponents()) {
-            if (c instanceof JLabel && ((JLabel)c).getIcon() != null) {
-                centerTableArea.remove(c);
-            }
-        }
-
-        for (Giocatore player : partita.getGioco().getGiocatori()) {
-            JPanel area = playerAreaMap.get(player);
-            if (area != null) {
-                area.setBorder(BorderFactory.createTitledBorder(
-                        null,
-                        player.getNome(),
-                        TitledBorder.CENTER,
-                        TitledBorder.TOP,
-                        new Font("SansSerif", Font.BOLD, 14),
-                        Color.WHITE
-                ));
-                drawPlayerHand(player, area, player instanceof GiocatoreUmano);
-            }
-        }
-
-        drawTable();
-        revalidate();
-        repaint();
     }
 
     private void drawPlayerHand(Giocatore player, JPanel area, boolean isHuman) {
@@ -325,14 +361,16 @@ public class GamePanel extends JPanel implements GameUI {
     }
 
     private void loadCardImages() {
-        String imagePath = "/images/carte/";
-        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/images/BackPanel.png"));
-        cardImages.put("BackPanel", bgIcon);
+        String imagePath = "/images/";
+        ImageIcon bgIcon = new ImageIcon(getClass().getResource(imagePath + "BackPanel.png"));
+        cardImages.put("backpanel", bgIcon);
+
+        String cardsPath = imagePath + "carte/";
         for (Valore valore : Valore.values()) {
             for (Seme seme : Seme.values()) {
                 String cardName = valore.name() + seme.name();
                 String fileName = cardName + ".png";
-                java.net.URL imgURL = getClass().getResource(imagePath + fileName);
+                java.net.URL imgURL = getClass().getResource(cardsPath + fileName);
                 if (imgURL != null) {
                     ImageIcon icon = new ImageIcon(imgURL);
                     Image scaled = icon.getImage().getScaledInstance(CARD_WIDTH, CARD_HEIGHT, Image.SCALE_SMOOTH);
@@ -341,14 +379,15 @@ public class GamePanel extends JPanel implements GameUI {
             }
         }
         String backName = "back_carta";
-        java.net.URL backURL = getClass().getResource(imagePath + backName + ".png");
+        java.net.URL backURL = getClass().getResource(cardsPath + backName + ".png");
         if (backURL != null) {
             ImageIcon icon = new ImageIcon(backURL);
             Image scaled = icon.getImage().getScaledInstance(CARD_WIDTH, CARD_HEIGHT, Image.SCALE_SMOOTH);
             cardImages.put(backName, new ImageIcon(scaled));
         }
+
         String rotatedBackName = "back_carta_ruotata";
-        java.net.URL rotatedBackURL = getClass().getResource(imagePath + rotatedBackName + ".png");
+        java.net.URL rotatedBackURL = getClass().getResource(cardsPath + rotatedBackName + ".png");
         if (rotatedBackURL != null) {
             ImageIcon icon = new ImageIcon(rotatedBackURL);
             Image scaled = icon.getImage().getScaledInstance(CARD_HEIGHT, CARD_WIDTH, Image.SCALE_SMOOTH);
