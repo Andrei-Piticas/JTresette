@@ -145,7 +145,7 @@ public class GamePanel extends JPanel implements GameUI {
     private void initializePlayerAreas() {
         northPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -35, 5));
         northPlayerArea.setPreferredSize(new Dimension(0, CARD_HEIGHT + 45));
-        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -35, 5));
+        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -10, 5));
         southPlayerArea.setPreferredSize(new Dimension(0, CARD_HEIGHT + 45));
         westPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
         westPlayerArea.setPreferredSize(new Dimension(CARD_HEIGHT + 20, 0));
