@@ -98,12 +98,12 @@ public class SettingPanel extends JPanel {
         cbEffetti.setIconTextGap(8);
         cbEffetti.setOpaque(false);
         cbEffetti.setSelected(true);
+        cbEffetti.addItemListener(e -> AudioManager.getInstance().toggleSoundEffects());
         cbEffetti.setAlignmentX(Component.CENTER_ALIGNMENT);
         cbEffetti.setPreferredSize(checkBoxSize);
         cbEffetti.setMaximumSize(checkBoxSize);
         center.add(cbEffetti);
 
-        // --- BLOCCO PER LA SELEZIONE DEL MAZZO (RIMOSSO) ---
 
         center.add(Box.createVerticalGlue());
         add(center, BorderLayout.CENTER);

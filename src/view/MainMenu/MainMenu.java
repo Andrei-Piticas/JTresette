@@ -67,7 +67,7 @@ public class MainMenu extends JFrame {
         setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
 
-        AudioManager.getInstance().play("src/audio/mainMenu.wav");
+        AudioManager.getInstance().playMusic("src/audio/mainMenu.wav");
 
         ImageIcon rawAv = new ImageIcon(getClass().getResource("/images/avatarTest.png"));
         Image initialAv = rawAv.getImage().getScaledInstance(82, 82, Image.SCALE_SMOOTH);

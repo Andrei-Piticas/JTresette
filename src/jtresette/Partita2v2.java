@@ -20,7 +20,6 @@ public class Partita2v2 {
     private static float[] punteggi;
     private int contaRound = 0;
     private int ultimoVincitore;
-    private float puntiUltimoRound;
     private int lastStartIndex; // Indice di chi ha iniziato il round
 
     public Partita2v2(List<Giocatore> players) {
@@ -113,7 +112,7 @@ public class Partita2v2 {
     // Svuota il tavolo per il round successivo
     public void svuotaTavolo() {
         tavolo.clear();
-        if (observer != null) {
+        if (this.contaRound < 10) { // Si usa < 9 perché il round viene contato da 0 a 9 (10 round totali)
             observer.update();
         }
     }

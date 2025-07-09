@@ -78,6 +78,7 @@ public class GamePanel extends JPanel implements GameUI {
         northPlayerArea.setPreferredSize(new Dimension(0, CARD_HEIGHT + 45));
         westPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
         eastPlayerArea = new JPanel(new GridLayout(0, 1, 5, -90));
+        eastPlayerArea.setPreferredSize(new Dimension(CARD_HEIGHT + 40, 0));
         centerTableArea = new JPanel(new GridBagLayout());
         westPlayerArea.setOpaque(false);
         eastPlayerArea.setOpaque(false);
@@ -87,7 +88,7 @@ public class GamePanel extends JPanel implements GameUI {
     private JPanel createSouthContainer() {
         JPanel southContainer = new JPanel(new BorderLayout());
         southContainer.setOpaque(false);
-        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -25, 5));
+        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -15, 5));
         southPlayerArea.setOpaque(false);
         southContainer.add(southPlayerArea, BorderLayout.CENTER);
         return southContainer;
@@ -212,7 +213,7 @@ public class GamePanel extends JPanel implements GameUI {
                 JPanel area = playerAreaMap.get(player);
                 if (area != null) {
                     float score = Partita2v2.getPunteggio(i);
-                    String title = String.format("%s: %.2f", player.getNome(), score);
+                    String title = String.format("%s: %.2f   ", player.getNome(), score);
                     area.setBorder(BorderFactory.createTitledBorder(
                             BorderFactory.createEmptyBorder(), title, TitledBorder.CENTER,
                             TitledBorder.TOP, new Font("SansSerif", Font.BOLD, 14), Color.WHITE
@@ -311,8 +312,8 @@ public class GamePanel extends JPanel implements GameUI {
             this.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
             this.setOpaque(false);
             winnerLabel = new JLabel("Mano vinta da: ", SwingConstants.CENTER);
-            winnerLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
-            winnerLabel.setForeground(Color.YELLOW);
+            winnerLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
+            winnerLabel.setForeground(Color.WHITE);
             winnerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.add(Box.createVerticalGlue());
             this.add(winnerLabel);
