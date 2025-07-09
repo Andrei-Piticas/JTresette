@@ -1,5 +1,6 @@
 package jtresette;
 
+import audio.AudioManager;
 import model.Mano;
 import model.Mazzo;
 import model.carta.Carta;
@@ -62,6 +63,8 @@ public class Partita2v2 {
         Carta c = g.giocaCarta(List.copyOf(tavolo));
         tavolo.add(c);
 
+        AudioManager.getInstance().playSoundEffect("src/audio/flipcard-91468.wav");
+
         turnoIndex = (turnoIndex + 1) % 4;
 
         // Notifica la grafica per aggiornarsi
@@ -95,10 +98,8 @@ public class Partita2v2 {
         this.ultimoVincitore = vincitore;
         if (observer != null) {
             String nomeVincitore = giocatori.get(vincitore).getNome();
-            // Calcola i punteggi totali delle squadre
-            float puntiSquadra1 = punteggi[0] + punteggi[2];
-            float puntiSquadra2 = punteggi[1] + punteggi[3];
-            observer.mostraRiepilogoMano(nomeVincitore, puntiSquadra1, puntiSquadra2);
+            // Ora passiamo solo il nome, senza i punteggi
+            observer.mostraRiepilogoMano(nomeVincitore);
         }
 
         float puntiRound = (float) tavolo.stream().mapToDouble(c -> c.getValore().getPunti()).sum();

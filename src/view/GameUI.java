@@ -10,6 +10,6 @@ public interface GameUI {
 
      void startNewGame();
 
-     void mostraRiepilogoMano(String nomeVincitore, float punteggioSquadra1, float punteggioSquadra2);
+     void mostraRiepilogoMano(String nomeVincitore);
 
 }

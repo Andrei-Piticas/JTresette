@@ -11,6 +11,8 @@ import java.awt.event.*;
 import java.net.URL;
 
 public class MainMenu extends JFrame {
+    // --- Instance Variables ---
+    private FullAvatarPanel avatarPanel;
     private JLabel nickLabel;
     private String currentNick;
     private CardLayout cards;
@@ -20,6 +22,7 @@ public class MainMenu extends JFrame {
     private final Statistiche stat;
     private final StatisticheRep repo;
     private GamePanel gamePanel;
+    private ProfilePanel profilePanel;
 
     private int getPlayerLevel() {
         return 2;
@@ -27,7 +30,7 @@ public class MainMenu extends JFrame {
 
     private class FullAvatarPanel extends JPanel {
         private final Image frameImage;
-        private final Image avatarImage;
+        private Image avatarImage;
 
         public FullAvatarPanel(Image initialAvatar) {
             ImageIcon fr = new ImageIcon(getClass().getResource("/images/avatar.png"));
@@ -47,6 +50,10 @@ public class MainMenu extends JFrame {
             int y = (getHeight() - avatarImage.getHeight(null)) / 2;
             g.drawImage(avatarImage, x, y, this);
         }
+
+        public void setAvatarImage(Image newAvatar) {
+            this.avatarImage = newAvatar;
+        }
     }
 
 
@@ -55,7 +62,6 @@ public class MainMenu extends JFrame {
         this.stat = stat;
         this.repo = repo;
         currentNick = "ANDREI";
-
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
@@ -67,11 +73,16 @@ public class MainMenu extends JFrame {
         Image initialAv = rawAv.getImage().getScaledInstance(82, 82, Image.SCALE_SMOOTH);
         String initialNick = "ANDREI";
 
+        // --- ORDINE DI INIZIALIZZAZIONE CORRETTO ---
+
+        // 1. Crea il CardLayout e il contenitore principale PRIMA di tutto
+        cards = new CardLayout();
+        cardHolder = new JPanel(cards);
+
+        // 2. Crea il pannello del menù
         ImageIcon icon = new ImageIcon(getClass().getResource("/images/3858.jpg"));
         BackgroundPanel menuPanel = new BackgroundPanel(icon.getImage());
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-
-
         menuPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 30, 40));
 
         for (int i = 0; i < levelIcons.length; i++) {
@@ -82,21 +93,8 @@ public class MainMenu extends JFrame {
             levelIcons[i] = new ImageIcon(scaled);
         }
 
-        initComponentsOn(menuPanel,currentNick);
-
-        cards = new CardLayout();
-        cardHolder = new JPanel(cards);
-        cardHolder.add(menuPanel, "MENU");
-        URL gameBgUrl = getClass().getResource("/images/backTest.png");
-        Image gameBg   = new ImageIcon(gameBgUrl)
-                .getImage()
-                .getScaledInstance(500,500, Image.SCALE_SMOOTH );
-        gamePanel = new GamePanel();
-        cardHolder.add(gamePanel, "GAME");
-        cardHolder.add(new SettingPanel(cards, cardHolder), "IMPOSTAZIONI");
-
-
-        ProfilePanel profilePanel = new ProfilePanel(
+        // 3. Crea il ProfilePanel (ora può essere una variabile locale, non serve più come attributo)
+        this.profilePanel = new ProfilePanel(
                 cards,
                 cardHolder,
                 initialAv,
@@ -105,17 +103,31 @@ public class MainMenu extends JFrame {
                 repo,
                 this
         );
-        cardHolder.add(profilePanel, "PROFILE");
+
+        // 4. Ora che cards, cardHolder e profilePanel esistono, inizializza i componenti del menù
+        initComponentsOn(menuPanel, currentNick);
+
+        // 5. Aggiungi tutti i pannelli al contenitore
+        cardHolder.add(menuPanel, "MENU");
+        gamePanel = new GamePanel(this.stat, this.repo, this.cards, this.cardHolder);
+        cardHolder.add(gamePanel, "GAME");
+        cardHolder.add(new SettingPanel(cards, cardHolder), "IMPOSTAZIONI");
+        cardHolder.add(this.profilePanel, "PROFILE");
 
         setContentPane(cardHolder);
         setVisible(true);
     }
 
-    private void initComponentsOn(JPanel bg,String nick) {
+    private void initComponentsOn(JPanel bg, String nick) {
+        this.avatarPanel = new FullAvatarPanel(
+                new ImageIcon(getClass().getResource("/images/avatarTest.png"))
+                        .getImage().getScaledInstance(82, 82, Image.SCALE_SMOOTH)
+        );
+
         ImageIcon nickBg = new ImageIcon(getClass().getResource("/images/nickBack.png"));
         Image nickImg = nickBg.getImage().getScaledInstance(220, 70, Image.SCALE_SMOOTH);
 
-        nickLabel = new JLabel(nick, new ImageIcon(nickImg),JLabel.CENTER);
+        nickLabel = new JLabel(nick, new ImageIcon(nickImg), JLabel.CENTER);
         nickLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         nickLabel.setForeground(Color.WHITE);
         nickLabel.setHorizontalTextPosition(JLabel.CENTER);
@@ -134,23 +146,21 @@ public class MainMenu extends JFrame {
         nickContainer.add(levelLabel);
         nickContainer.setBorder(BorderFactory.createEmptyBorder(35, 0, 0, 0));
 
-        FullAvatarPanel avatarPanel = new FullAvatarPanel(
-                new ImageIcon(getClass().getResource("/images/avatarTest.png"))
-                        .getImage().getScaledInstance(82, 82, Image.SCALE_SMOOTH)
-        );
-        avatarPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
-        avatarPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        avatarPanel.addMouseListener(new MouseAdapter() {
+        this.avatarPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+        this.avatarPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        this.avatarPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+
                 cards.show(cardHolder, "PROFILE");
+                profilePanel.aggiornaDisplayStatistiche();
             }
         });
 
         JPanel profileContainer = new JPanel();
         profileContainer.setLayout(new BoxLayout(profileContainer, BoxLayout.X_AXIS));
         profileContainer.setOpaque(false);
-        profileContainer.add(avatarPanel);
+        profileContainer.add(this.avatarPanel);
         profileContainer.add(Box.createRigidArea(new Dimension(-27, 0)));
         profileContainer.add(nickContainer);
 
@@ -164,16 +174,6 @@ public class MainMenu extends JFrame {
         titleM.setHorizontalAlignment(JLabel.CENTER);
         titleM.setVerticalAlignment(JLabel.CENTER);
 
-        ImageIcon rawAch = new ImageIcon(getClass().getResource("/images/achivments.png"));
-        Image scaledAch = rawAch.getImage().getScaledInstance(330, 130, Image.SCALE_SMOOTH);
-        JLabel achivments = new JLabel("OBIETTIVI                     ", new ImageIcon(scaledAch), JLabel.CENTER);
-        achivments.setForeground(Color.white);
-        achivments.setFont(new Font("Serif", Font.BOLD, 20));
-        achivments.setHorizontalTextPosition(JLabel.CENTER);
-        achivments.setVerticalTextPosition(JLabel.CENTER);
-        achivments.setHorizontalAlignment(JLabel.CENTER);
-        achivments.setVerticalAlignment(JLabel.CENTER);
-
         JPanel header = new JPanel(new GridLayout(1, 3));
         header.setOpaque(false);
         header.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, -70));
@@ -181,7 +181,9 @@ public class MainMenu extends JFrame {
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         header.add(profileContainer);
         header.add(titleM);
-        header.add(achivments);
+        JPanel placeholder = new JPanel();
+        placeholder.setOpaque(false);
+        header.add(placeholder);
         bg.add(header);
         bg.add(Box.createVerticalStrut(20));
 
@@ -201,8 +203,8 @@ public class MainMenu extends JFrame {
         bottImpostazioni.setAlignmentX(Component.CENTER_ALIGNMENT);
         bottEsci.setAlignmentX(Component.CENTER_ALIGNMENT);
         bottGioca.addActionListener(e -> {
-            cards.show(cardHolder, "GAME"); // 1. Mostra il pannello del gioco
-            gamePanel.startNewGame();       // 2. Avvia la partita!
+            cards.show(cardHolder, "GAME");
+            gamePanel.startNewGame();
         });
         bottImpostazioni.addActionListener(e -> cards.show(cardHolder, "IMPOSTAZIONI"));
         bottEsci.addActionListener(e -> System.exit(0));
@@ -262,12 +264,17 @@ public class MainMenu extends JFrame {
         footer.setOpaque(false);
         footer.add(muteButton);
         bg.add(footer);
+    }
 
+    public void updateAvatar(Image newAvatar) {
+        if (avatarPanel != null) {
+            avatarPanel.setAvatarImage(newAvatar);
+            avatarPanel.repaint();
+        }
     }
 
     public void updateNickname(String newNick) {
         currentNick = newNick;
         nickLabel.setText(newNick);
     }
-
 }
