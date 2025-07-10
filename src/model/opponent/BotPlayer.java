@@ -7,22 +7,43 @@ import model.carta.Seme;
 
 import java.util.List;
 
+/**
+ * La classe BotPlayer rappresenta un giocatore bot nel gioco del Tresette.
+ * Implementa l'interfaccia Giocatore e gestisce la logica per giocare le carte
+ * in base a una strategia definita.
+ */
+
 public class BotPlayer implements Giocatore {
 
-    private final Mano mano = new Mano();
-    private final Strategia strategia = new Strategia();
-    private String nome;
+
+    private final Mano mano = new Mano(); // Mano del bot
+    private final Strategia strategia = new Strategia(); // Strategia del bot per scegliere le carte da giocare
+    private String nome; // Nome dei due  bot
 
 
+    /**
+     * aggiunge una carta alla mano del bot.
 
+     */
     @Override
     public void riceviCarta(Carta c) {
             mano.addCarta(c);
     }
 
+    /**
+     Determina e gioca una carta seguendo la logica definita dalla Strategia.
+     Prima delega la scelta alla classe Strategia, ma se la strategia dovesse fallire e restituire null, il bot giocherà
+     semplicemente la prima carta valida disponibile per evitare di bloccare il gioco.
+     */
     @Override
     public Carta giocaCarta(List<Carta> tavolo) {
+
+        /*
+        Se il tavolo è vuoto, non c'è seme guida, quindi il bot può giocare qualsiasi carta.
+        */
         Seme semeGuida = tavolo.isEmpty() ? null : tavolo.get(0).seme();
+
+        /* Filtra le carte della mano del bot in base al seme guida. */
         List<Carta> cartePossibili = mano.getCarte().stream()
                 .filter(c -> semeGuida == null || c.seme() == semeGuida)
                 .toList();
@@ -30,12 +51,16 @@ public class BotPlayer implements Giocatore {
             cartePossibili = mano.getCarte();
         }
 
+
         Mano manoTemp = new Mano(cartePossibili);
         Carta scelta = strategia.scegliCarta(manoTemp, tavolo);
 
-        // *** NUOVO: fallback se la strategia restituisce null ***
+         /*
+        Se non ci sono carte valide da giocare, il bot giocherà la prima carta disponibile.
+        */
+
+
         if (scelta == null) {
-            // prendi semplicemente la prima carta disponibile
             scelta = cartePossibili.get(0);
         }
 
@@ -44,10 +69,53 @@ public class BotPlayer implements Giocatore {
     }
 
 
+    /**
+     * Restituisce la mano del bot in una copia.
+     */
     @Override
     public List<Carta> getCarte() {
         return mano.getCarte();
     }
+
+
+    /**
+      Gioca una carta dalla mano del bot, utilizzando la strategia definita.
+    */
+
+    @Override
+    public Carta giocaCarta(List<Carta> carte, List<Carta> tavolo) {
+        return giocaCarta(tavolo);
+    }
+
+
+    /*
+     * Svuota la mano del bot, rimuovendo tutte le carte.
+     */
+    @Override
+    public void svuotaMano() {
+        this.mano.svuota();
+    }
+
+
+
+    /**
+     * Restituisce il nome del bot settato.
+     */
+    @Override
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+
+
+    @Override
+    public String getNome() {
+        return this.nome;
+    }
+
+
+
+
 
     @Override
     public Carta giocaCarta() {
@@ -55,25 +123,7 @@ public class BotPlayer implements Giocatore {
     }
 
     @Override
-    public Carta giocaCarta(List<Carta> carte, List<Carta> tavolo) {
-        return giocaCarta(tavolo);
-    }
-
-    @Override
     public String getNome(String nome) {
         return "Bot";
-    }
-    @Override
-    public void svuotaMano() {
-        this.mano.svuota(); // Or this.mano.clear() if 'mano' is a List
-    }
-    @Override
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    @Override
-    public String getNome() {
-        return this.nome;
     }
 }
