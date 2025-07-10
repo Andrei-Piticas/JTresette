@@ -1,8 +1,8 @@
 
-package jtresette;
+package controller;
 
 import model.Statistiche;
-import services.StatisticheRep;
+import model.services.StatisticheRep;
 import view.MainMenu.MainMenu;
 
 import javax.swing.*;

@@ -1,8 +1,8 @@
-package jtresette;
+package model;
 
-import audio.AudioManager;
-import model.Mano;
-import model.Mazzo;
+import view.audio.AudioManager;
+import controller.Giocatore;
+import controller.GiocatoreUmano;
 import model.carta.Carta;
 import model.carta.Seme;
 import view.GameUI;
@@ -62,7 +62,7 @@ public class Partita2v2 {
         Carta c = g.giocaCarta(List.copyOf(tavolo));
         tavolo.add(c);
 
-        AudioManager.getInstance().playSoundEffect("src/audio/flipcard-91468.wav");
+        AudioManager.getInstance().playSoundEffect("src/view/audio/flipcard-91468.wav");
 
         turnoIndex = (turnoIndex + 1) % 4;
 
@@ -70,7 +70,13 @@ public class Partita2v2 {
         if (observer != null) {
             observer.update();
             try {
-                if (!(g instanceof GiocatoreUmano)) Thread.sleep(800);
+                // Se non è l'umano, aspetta la pausa del bot
+                if (!(g instanceof GiocatoreUmano)) {
+                    Thread.sleep(800);
+                } else {
+                    // ALTRIMENTI, aggiungi una piccola pausa anche dopo la tua giocata
+                    Thread.sleep(1000);
+                }
             } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         }
     }

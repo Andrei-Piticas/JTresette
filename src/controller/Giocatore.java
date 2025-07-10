@@ -1,4 +1,4 @@
-package jtresette;
+package controller;
 
 import model.carta.Carta;
 

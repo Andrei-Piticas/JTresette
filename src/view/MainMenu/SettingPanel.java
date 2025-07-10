@@ -3,7 +3,7 @@ package view.MainMenu;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-import audio.AudioManager;
+import view.audio.AudioManager;
 
 public class SettingPanel extends JPanel {
     private final Image backgImage;

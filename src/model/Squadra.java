@@ -26,7 +26,7 @@ public class Squadra {
 
 
 
-    public float calcolaPunteggio(jtresette.Partita2v2 partita){
+    public float calcolaPunteggio(Partita2v2 partita){
         return partita.getPunteggio(giocatore1) + partita.getPunteggio(giocatore2);
 
     }

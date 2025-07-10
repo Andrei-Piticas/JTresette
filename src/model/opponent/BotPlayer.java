@@ -1,6 +1,6 @@
-package opponent;
+package model.opponent;
 
-import jtresette.Giocatore;
+import controller.Giocatore;
 import model.Mano;
 import model.carta.Carta;
 import model.carta.Seme;

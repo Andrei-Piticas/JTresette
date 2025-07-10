@@ -1,8 +1,8 @@
 package view.MainMenu;
 
-import audio.AudioManager;
+import view.audio.AudioManager;
 import model.Statistiche;
-import services.StatisticheRep;
+import model.services.StatisticheRep;
 import view.Game.GamePanel;
 
 import javax.swing.*;
@@ -11,9 +11,10 @@ import java.awt.event.*;
 import java.net.URL;
 
 public class MainMenu extends JFrame {
-    // --- Instance Variables ---
+
     private FullAvatarPanel avatarPanel;
     private JLabel nickLabel;
+    private JLabel levelLabel; // <-- Made into an instance variable
     private String currentNick;
     private CardLayout cards;
     private JPanel cardHolder;
@@ -23,6 +24,7 @@ public class MainMenu extends JFrame {
     private final StatisticheRep repo;
     private GamePanel gamePanel;
     private ProfilePanel profilePanel;
+    private BackgroundPanel menuPanel; // <-- Made into an instance variable
 
     private int getPlayerLevel() {
         return 2;
@@ -67,21 +69,21 @@ public class MainMenu extends JFrame {
         setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
 
-        AudioManager.getInstance().playMusic("src/audio/mainMenu.wav");
+        AudioManager.getInstance().playMusic("src/view/audio/mainMenu.wav");
 
         ImageIcon rawAv = new ImageIcon(getClass().getResource("/images/avatarTest.png"));
         Image initialAv = rawAv.getImage().getScaledInstance(82, 82, Image.SCALE_SMOOTH);
         String initialNick = "ANDREI";
 
-        // --- ORDINE DI INIZIALIZZAZIONE CORRETTO ---
-
-        // 1. Crea il CardLayout e il contenitore principale PRIMA di tutto
         cards = new CardLayout();
         cardHolder = new JPanel(cards);
 
-        // 2. Crea il pannello del menù
+        // --- LISTENER PER L'AGGIORNAMENTO AUTOMATICO ---
+
+
+        // Creazione pannelli
         ImageIcon icon = new ImageIcon(getClass().getResource("/images/3858.jpg"));
-        BackgroundPanel menuPanel = new BackgroundPanel(icon.getImage());
+        menuPanel = new BackgroundPanel(icon.getImage()); // Inizializza l'attributo di istanza
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 30, 40));
 
@@ -93,21 +95,9 @@ public class MainMenu extends JFrame {
             levelIcons[i] = new ImageIcon(scaled);
         }
 
-        // 3. Crea il ProfilePanel (ora può essere una variabile locale, non serve più come attributo)
-        this.profilePanel = new ProfilePanel(
-                cards,
-                cardHolder,
-                initialAv,
-                initialNick,
-                stat,
-                repo,
-                this
-        );
-
-        // 4. Ora che cards, cardHolder e profilePanel esistono, inizializza i componenti del menù
+        this.profilePanel = new ProfilePanel(cards, cardHolder, initialAv, initialNick, stat, repo, this);
         initComponentsOn(menuPanel, currentNick);
 
-        // 5. Aggiungi tutti i pannelli al contenitore
         cardHolder.add(menuPanel, "MENU");
         gamePanel = new GamePanel(this.stat, this.repo, this.cards, this.cardHolder);
         cardHolder.add(gamePanel, "GAME");
@@ -136,7 +126,7 @@ public class MainMenu extends JFrame {
         nickLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         int livello = getPlayerLevel();
-        JLabel levelLabel = new JLabel(levelIcons[livello]);
+        levelLabel = new JLabel(levelIcons[livello]); // Inizializza l'attributo di istanza
         levelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel nickContainer = new JPanel();
@@ -151,9 +141,8 @@ public class MainMenu extends JFrame {
         this.avatarPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
-                cards.show(cardHolder, "PROFILE");
                 profilePanel.aggiornaDisplayStatistiche();
+                cards.show(cardHolder, "PROFILE");
             }
         });
 

@@ -1,4 +1,6 @@
-package jtresette;
+package model;
+
+import controller.Giocatore;
 
 import java.util.List;
 
@@ -27,13 +29,16 @@ public class Partita {
         }
         return calcolaVincitore();
     }
-
     public String calcolaVincitore() {
+        // Calcola i punteggi di squadra come prima
         float puntiSquadra1 = Partita2v2.getPunteggio(0) + Partita2v2.getPunteggio(2);
         float puntiSquadra2 = Partita2v2.getPunteggio(1) + Partita2v2.getPunteggio(3);
 
-        String nomeSquadra1 = "Squadra 1 (Tu e Bot Nord)";
-        String nomeSquadra2 = "Squadra 2 (Bot Ovest e Est)";
+        // --- NUOVA LOGICA PER I NOMI ---
+        // Recupera i nomi dei giocatori dalla logica di gioco
+        List<Giocatore> giocatori = gioco.getGiocatori();
+        String nomeSquadra1 = giocatori.get(0).getNome() + " & " + giocatori.get(2).getNome(); // Andrei & Borl
+        String nomeSquadra2 = giocatori.get(1).getNome() + " & " + giocatori.get(3).getNome(); // ThomasBot & DiegoBot
 
         System.out.println("\nRISULTATO FINALE → " +
                 nomeSquadra1 + ": " + String.format("%.2f", puntiSquadra1) + " pt | " +

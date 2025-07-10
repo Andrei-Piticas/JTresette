@@ -1,4 +1,4 @@
-package opponent;
+package model.opponent;
 
 public class Logica {
 }

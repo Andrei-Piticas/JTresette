@@ -1,7 +1,7 @@
 package view.MainMenu;
 
 import model.Statistiche;
-import services.StatisticheRep;
+import model.services.StatisticheRep;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

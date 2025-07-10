@@ -1,4 +1,4 @@
-package opponent;
+package model.opponent;
 
 import model.carta.Carta;
 import model.Mano;
