@@ -483,7 +483,7 @@ public class GamePanel extends JPanel implements GameUI {
         }
 
 
-        /*
+        /**
          * Mostra il nome del vincitore della mano.
          */
         public void updateInfoMano(String winnerName) {
@@ -492,7 +492,7 @@ public class GamePanel extends JPanel implements GameUI {
         }
 
 
-        /*
+        /**
          * Mostra il riepilogo finale della partita.
          * Viene chiamato quando la partita termina.
          */

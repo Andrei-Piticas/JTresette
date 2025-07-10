@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 
-/* La classe BackgroundPanel è un componente UI riutilizzabile che estende JPanel
- * per creare un pannello con un'immagine di sfondo */
+/** La classe BackgroundPanel è un componente UI riutilizzabile che estende JPanel
+   per creare un pannello con un'immagine di sfondo */
 public class BackgroundPanel extends JPanel {
     private final Image backImg;
 

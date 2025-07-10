@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import java.io.*;
 
 
-/* Classe per la gestione delle statistiche del gioco,che ha come unico scopo caricare e salvare le statistiche in un file JSON.
+/** Classe per la gestione delle statistiche del gioco,che ha come unico scopo caricare e salvare le statistiche in un file JSON.
  */
 public class StatisticheRep {
     private static final String FILE_PATH = "stats.json";

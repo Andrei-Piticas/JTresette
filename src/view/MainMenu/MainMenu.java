@@ -11,7 +11,7 @@ import java.awt.event.*;
 import java.net.URL;
 
 
-/* La classe MainMenu rappresenta la finestra principale (JFrame) dell'applicazione JTresette.
+/** La classe MainMenu rappresenta la finestra principale (JFrame) dell'applicazione JTresette.
    Agisce come contenitore e gestore della navigazione per tutti gli altri pannelli(gioco, impostazioni, profilo),
  * utilizzando un CardLayout per passare da una schermata all'altra*/
 public class MainMenu extends JFrame {
@@ -31,7 +31,7 @@ public class MainMenu extends JFrame {
     private BackgroundPanel menuPanel;
 
 
-    /*Esempio di utilizzo per il livello che si adatta al numero fornito*/
+    /**Esempio di utilizzo per il livello che si adatta al numero fornito*/
     private int getPlayerLevel() {
         return 2;
     }

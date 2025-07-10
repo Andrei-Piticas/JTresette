@@ -6,8 +6,8 @@ import java.io.InputStream;
 import javax.sound.sampled.*;
 
 
-//*Gestisce tutta la riproduzione audio dell'applicazione.
-// Questa classe è implementata seguendo il singleton,quindi ne puo esistere solamente una in tutto il progetto*//
+/**Gestisce tutta la riproduzione audio dell'applicazione.
+  Questa classe è implementata seguendo il singleton,quindi ne puo esistere solamente una in tutto il progetto*/
 public class AudioManager {
     private static AudioManager instance;
     private Clip musicClip;
@@ -49,7 +49,7 @@ public class AudioManager {
         }
     }
 
-    //*Attiva o disattiva la musica*//
+    //**Attiva o disattiva la musica*//
     public void toggleMusic() {
         if (musicClip == null) return;
         if (musicClip.isRunning()) {
@@ -59,7 +59,7 @@ public class AudioManager {
         }
     }
 
-    //*Attiva o disattiva gli effetti sonori*//
+    //**Attiva o disattiva gli effetti sonori*//
     public void toggleSoundEffects() {
         this.soundEffectsMuted = !this.soundEffectsMuted; // Inverte lo stato del muto
         System.out.println("Effetti sonori " + (soundEffectsMuted ? "disattivati" : "attivati"));

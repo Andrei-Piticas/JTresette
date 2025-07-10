@@ -7,7 +7,7 @@ import view.audio.AudioManager;
 
 
 
-/*La classe SettingPanel rappresenta la schermata delle impostazioni del gioco. */
+/** La classe SettingPanel rappresenta la schermata delle impostazioni del gioco. */
 public class SettingPanel extends JPanel {
     private final Image backgImage;
 

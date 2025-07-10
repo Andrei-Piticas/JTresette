@@ -13,7 +13,7 @@ import java.net.URL;
 
 
 
-/* * La classe ProfilePanel rappresenta la schermata del profilo utente.
+/** La classe ProfilePanel rappresenta la schermata del profilo utente.
  * Questa permette all'utente di visualizzare le proprie statistiche di gioco,
  * modificare il proprio nickname e cambiare l'immagine del proprio avatar. */
 public class ProfilePanel extends JPanel {
