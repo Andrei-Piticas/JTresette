@@ -11,6 +11,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URL;
 
+
+
+/* * La classe ProfilePanel rappresenta la schermata del profilo utente.
+ * Questa permette all'utente di visualizzare le proprie statistiche di gioco,
+ * modificare il proprio nickname e cambiare l'immagine del proprio avatar. */
 public class ProfilePanel extends JPanel {
     // --- Attributi spostati qui ---
     private final CardLayout cards;
@@ -23,11 +28,13 @@ public class ProfilePanel extends JPanel {
     private Image backgAvatar;
     private final MainMenu mainMenu;
 
-    // --- Dichiarazione dei JButton come attributi di istanza ---
+
     private JButton btnGiocate;
     private JButton btnVinte;
     private JButton btnPerse;
 
+
+    /*Costruttore del pannello del profilo*/
     public ProfilePanel(CardLayout cards, JPanel cardHolder, Image initialAvatar, String initialNick, Statistiche stats, StatisticheRep repo, MainMenu mainMenu) {
         super();
         this.cards = cards;
@@ -46,11 +53,13 @@ public class ProfilePanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        initComponentsOn(this, initialNick);
+        iniziaComponentis(this, initialNick);
     }
 
-    private void initComponentsOn(JPanel panel, String initialNick) {
-        // --- Header (invariato) ---
+
+    /* Assembla e configura tutti i componenti grafici di questo pannello. */
+    private void iniziaComponentis(JPanel panel, String initialNick) {
+        //Header
         URL backUrl = getClass().getResource("/images/backButton.png");
         ImageIcon rawBack = new ImageIcon(backUrl);
         ImageIcon backIcon = new ImageIcon(rawBack.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH));
@@ -73,7 +82,7 @@ public class ProfilePanel extends JPanel {
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(header);
 
-        // --- Avatar Panel (invariato) ---
+        //Avatar Panel
         JPanel avatarPanel = new JPanel() {
             {
                 setPreferredSize(new Dimension(130, 130));
@@ -106,7 +115,7 @@ public class ProfilePanel extends JPanel {
         };
         panel.add(avatarPanel);
 
-        // --- Nickname Panel (invariato) ---
+        // Nickname
         URL nickBgUrl = getClass().getResource("/images/nickBack.png");
         Image nickBgImg = new ImageIcon(nickBgUrl).getImage().getScaledInstance(250, 80, Image.SCALE_SMOOTH);
         BackgroundPanel nickBgPanel = new BackgroundPanel(nickBgImg);
@@ -132,7 +141,7 @@ public class ProfilePanel extends JPanel {
         avatarNickContainer.add(nickBgPanel);
         panel.add(avatarNickContainer);
 
-        // --- Pannello Statistiche ---
+        // Statistiche
         URL woodUrl = getClass().getResource("/images/BackPanel.png");
         Image woodImg = new ImageIcon(woodUrl).getImage().getScaledInstance(600, 450, Image.SCALE_SMOOTH);
         BackgroundPanel statsPanel = new BackgroundPanel(woodImg);
@@ -146,7 +155,7 @@ public class ProfilePanel extends JPanel {
         ImageIcon genIcon = new ImageIcon(new ImageIcon(genUrl).getImage().getScaledInstance(350, 100, Image.SCALE_SMOOTH));
         Dimension btnSize = new Dimension(350, 100);
 
-        // --- Inizializzazione degli attributi di istanza ---
+
         btnGiocate = new JButton("Partite Giocate: " + stats.getPartiteGiocate(), genIcon);
         btnVinte = new JButton("Partite Vinte: " + stats.getPartiteVinte(), genIcon);
         btnPerse = new JButton("Partite Perse: " + stats.getPartitePerse(), genIcon);
@@ -175,7 +184,7 @@ public class ProfilePanel extends JPanel {
         panel.add(Box.createVerticalStrut(20));
         panel.add(Box.createVerticalGlue());
 
-        // --- Pulsanti Salva/Annulla (invariati) ---
+        //Pulsante salva e annulla
         URL statButtonUrl = getClass().getResource("/images/generalButtons.png");
         ImageIcon rawButtonStat = new ImageIcon(statButtonUrl);
         Image ButtonStatImg = rawButtonStat.getImage().getScaledInstance(190, 80, Image.SCALE_SMOOTH);
@@ -215,7 +224,7 @@ public class ProfilePanel extends JPanel {
         panel.add(buttonsPanel);
     }
 
-    // --- NUOVO METODO PUBBLICO ---
+    /** Metodo per aggiornare le statistiche visualizzate nel pannello del profilo */
     public void aggiornaDisplayStatistiche() {
         if (btnGiocate != null && btnVinte != null && btnPerse != null) {
             btnGiocate.setText("Partite Giocate: " + stats.getPartiteGiocate());

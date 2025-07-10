@@ -5,16 +5,24 @@ import java.awt.*;
 import java.net.URL;
 import view.audio.AudioManager;
 
+
+
+/*La classe SettingPanel rappresenta la schermata delle impostazioni del gioco. */
 public class SettingPanel extends JPanel {
     private final Image backgImage;
 
+    /**
+     * Costruttore della classe SettingPanel.
+     * Inizializza il pannello delle impostazioni con un'immagine di sfondo,
+     * un pulsante per tornare al menu principale e due checkbox per le opzioni audio.
+     */
     public SettingPanel(CardLayout cards, JPanel cardHolder) {
         URL bgUrl = getClass().getResource("/images/avatar_background.jpg");
         backgImage = new ImageIcon(bgUrl).getImage();
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        // --- Pulsante Indietro (invariato) ---
+
         URL backUrl = getClass().getResource("/images/backButton.png");
         ImageIcon rawBack = new ImageIcon(backUrl);
         ImageIcon backIcon = new ImageIcon(
@@ -26,7 +34,7 @@ public class SettingPanel extends JPanel {
         back.setFocusPainted(false);
         back.addActionListener(e -> cards.show(cardHolder, "MENU"));
 
-        // --- Pannello Titolo (con titolo centrato) ---
+
         URL tUrl = getClass().getResource("/images/TitleBack.png");
         ImageIcon rawTitle = new ImageIcon(tUrl);
         ImageIcon titleIcon = new ImageIcon(
@@ -44,7 +52,7 @@ public class SettingPanel extends JPanel {
         topBar.add(back, BorderLayout.WEST);
         topBar.add(title, BorderLayout.CENTER);
 
-        // Aggiunge un pannello invisibile a destra per centrare il titolo
+
         JPanel placeholder = new JPanel();
         placeholder.setOpaque(false);
         placeholder.setPreferredSize(back.getPreferredSize());
@@ -52,13 +60,14 @@ public class SettingPanel extends JPanel {
 
         add(topBar, BorderLayout.NORTH);
 
-        // --- Pannello Centrale (con opzioni modificate) ---
+
         JPanel center = new JPanel();
         center.setOpaque(false);
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
 
 
-        // Caricamento icone CheckBox (invariato)
+        // Caricamento icone CheckBox
+
         URL offUrl = getClass().getResource("/images/checkbox_off.png");
         URL onUrl  = getClass().getResource("/images/checkbox_on.png");
         ImageIcon offScaled = new ImageIcon(new ImageIcon(offUrl).getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH));
@@ -71,7 +80,7 @@ public class SettingPanel extends JPanel {
 
         center.add(Box.createRigidArea(new Dimension(0, 60)));
 
-        // --- CheckBox "Musica" (con stile modificato) ---
+        // CheckBox Musica
         JCheckBox cbMusica = new JCheckBox("Musica");
         cbMusica.setFont(new Font("SansSerif", Font.BOLD, 22)); // Font modificato
         cbMusica.setForeground(Color.WHITE);                     // Colore modificato
@@ -88,7 +97,7 @@ public class SettingPanel extends JPanel {
         center.add(cbMusica);
         center.add(Box.createVerticalStrut(10));
 
-        // --- CheckBox "Effetti Sonori" (con stile modificato) ---
+        //CheckBox degli Effetti Sonori
         JCheckBox cbEffetti = new JCheckBox("Effetti Sonori");
         cbEffetti.setFont(new Font("SansSerif", Font.BOLD, 22)); // Font modificato
         cbEffetti.setForeground(Color.WHITE);                      // Colore modificato

@@ -10,11 +10,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
 
+
+/* La classe MainMenu rappresenta la finestra principale (JFrame) dell'applicazione JTresette.
+   Agisce come contenitore e gestore della navigazione per tutti gli altri pannelli(gioco, impostazioni, profilo),
+ * utilizzando un CardLayout per passare da una schermata all'altra*/
 public class MainMenu extends JFrame {
 
     private FullAvatarPanel avatarPanel;
     private JLabel nickLabel;
-    private JLabel levelLabel; // <-- Made into an instance variable
+    private JLabel levelLabel;
     private String currentNick;
     private CardLayout cards;
     private JPanel cardHolder;
@@ -24,12 +28,20 @@ public class MainMenu extends JFrame {
     private final StatisticheRep repo;
     private GamePanel gamePanel;
     private ProfilePanel profilePanel;
-    private BackgroundPanel menuPanel; // <-- Made into an instance variable
+    private BackgroundPanel menuPanel;
 
+
+    /*Esempio di utilizzo per il livello che si adatta al numero fornito*/
     private int getPlayerLevel() {
         return 2;
     }
 
+
+
+    /**
+     * Classe interna per rappresentare il pannello dell'avatar,
+     * che disegna sia l'immagine dell'avatar che la sua cornice.
+     */
     private class FullAvatarPanel extends JPanel {
         private final Image frameImage;
         private Image avatarImage;
@@ -59,6 +71,8 @@ public class MainMenu extends JFrame {
     }
 
 
+    /** Costruttore della classe MainMenu che inizializza la finestra principale e i suoi componenti. */
+
     public MainMenu(Statistiche stat, StatisticheRep repo) throws Exception {
         super("JTresette");
         this.stat = stat;
@@ -78,10 +92,8 @@ public class MainMenu extends JFrame {
         cards = new CardLayout();
         cardHolder = new JPanel(cards);
 
-        // --- LISTENER PER L'AGGIORNAMENTO AUTOMATICO ---
 
 
-        // Creazione pannelli
         ImageIcon icon = new ImageIcon(getClass().getResource("/images/3858.jpg"));
         menuPanel = new BackgroundPanel(icon.getImage()); // Inizializza l'attributo di istanza
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
@@ -96,7 +108,7 @@ public class MainMenu extends JFrame {
         }
 
         this.profilePanel = new ProfilePanel(cards, cardHolder, initialAv, initialNick, stat, repo, this);
-        initComponentsOn(menuPanel, currentNick);
+        inizializzaComponenti(menuPanel, currentNick);
 
         cardHolder.add(menuPanel, "MENU");
         gamePanel = new GamePanel(this.stat, this.repo, this.cards, this.cardHolder);
@@ -108,7 +120,9 @@ public class MainMenu extends JFrame {
         setVisible(true);
     }
 
-    private void initComponentsOn(JPanel bg, String nick) {
+
+    /** Metodo privato per assemblare i componenti grafici del pannello del menu principale.*/
+    private void inizializzaComponenti(JPanel bg, String nick) {
         this.avatarPanel = new FullAvatarPanel(
                 new ImageIcon(getClass().getResource("/images/avatarTest.png"))
                         .getImage().getScaledInstance(82, 82, Image.SCALE_SMOOTH)
@@ -126,7 +140,7 @@ public class MainMenu extends JFrame {
         nickLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         int livello = getPlayerLevel();
-        levelLabel = new JLabel(levelIcons[livello]); // Inizializza l'attributo di istanza
+        levelLabel = new JLabel(levelIcons[livello]);
         levelLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel nickContainer = new JPanel();
@@ -255,6 +269,9 @@ public class MainMenu extends JFrame {
         bg.add(footer);
     }
 
+
+    /** Metodo per aggiornare l'avatar del profilo corrente.
+     */
     public void updateAvatar(Image newAvatar) {
         if (avatarPanel != null) {
             avatarPanel.setAvatarImage(newAvatar);
@@ -262,6 +279,8 @@ public class MainMenu extends JFrame {
         }
     }
 
+    /** Metodo per aggiornare il nick del profilo corrente.
+     */
     public void updateNickname(String newNick) {
         currentNick = newNick;
         nickLabel.setText(newNick);
