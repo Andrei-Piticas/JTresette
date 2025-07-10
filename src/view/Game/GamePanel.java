@@ -104,7 +104,7 @@ public class GamePanel extends JPanel implements GameUI {
     private JPanel createSouthContainer() {
         JPanel southContainer = new JPanel(new BorderLayout());
         southContainer.setOpaque(false);
-        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -25, 5));
+        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -5, 5));
         southPlayerArea.setOpaque(false);
         southContainer.add(southPlayerArea, BorderLayout.CENTER);
         return southContainer;
