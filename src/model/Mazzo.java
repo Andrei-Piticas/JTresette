@@ -10,10 +10,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+
+/**
+  Rappresenta il mazzo di 40 carte da gioco e gestisce la creazione di un mazzo standard, la sua mescolata
+  e la distribuzione delle carte ai giocatori all'inizio di una partita.
+ */
+
 public class Mazzo {
     private final List<Carta> carte;
 
-
+    /*
+    Crea un mazzo completo e ordinato di 40 carte,
+    iterando attraverso tutti i semi e tutti i valori.
+    /*
+     */
     public Mazzo(){
             carte = new ArrayList<>(40);
                 for(Seme s : Seme.values())
@@ -22,12 +32,13 @@ public class Mazzo {
     }
 
 
+    /*Mescola le carte nel mazzo in modo casuale.*/
     public void mescola(){
         Collections.shuffle(carte);
 
     }
 
-
+    /*pesca la prima disponibile e la rimuove dal mazzo*/
     public Carta pesca(){
             if(carte.isEmpty()) {
                 throw new IllegalStateException("Il mazzo e esaurito");
@@ -36,11 +47,15 @@ public class Mazzo {
 
     }
 
+
+    /*Distrubuisce le carte ai giocatori,attraverso l'utilizzo di stream,sottoforma di lista*/
     public List<Mano>distribuzione(){
             List<Mano> mani = Stream.generate(Mano::new)
                     .limit(4)
                     .toList();
 
+
+            /*ciclo che simula la situazione dei giocatori*/
             for(int count : new int[]{4,3,3}){
                     for(Mano m:mani){
                         List<Carta> pescate = new ArrayList<>(count);
@@ -51,11 +66,8 @@ public class Mazzo {
                     }
             }
             return mani;
+
     }
 
-
-    public int carteRimanenti(){
-            return carte.size();
-    }
 
 }
