@@ -3,9 +3,8 @@ package model;
 import org.json.JSONObject;
 
 
-//** Statistiche è un modello che contiene tutte le informazioni relative ai progressi e alla carriera di un giocatore.
-// È responsabile di mantenere il conteggio delle partite giocate, vinte e perse.
-//*
+/**Statistiche è un modello che contiene tutte le informazioni relative ai progressi e alla carriera di un giocatore.
+    È responsabile di mantenere il conteggio delle partite giocate, vinte e perse. */
 public class Statistiche {
     private int partiteGiocate;
     private int partiteVinte;

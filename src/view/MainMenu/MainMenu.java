@@ -77,7 +77,7 @@ public class MainMenu extends JFrame {
         super("JTresette");
         this.stat = stat;
         this.repo = repo;
-        currentNick = "ANDREI";
+        currentNick = "NICKNAME";
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);

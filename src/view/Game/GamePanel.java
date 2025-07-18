@@ -46,7 +46,7 @@ public class GamePanel extends JPanel implements GameUI {
 
     // dichiaro attributi per la partita e la carta scelta dall'utente + statistiche
     private Partita partita;
-    private Carta cartaSceltaDallUmano;
+    private Carta cartaSceltaDaUmano;
     private final Object lock = new Object(); //serve a sincronizzare due thread diversi(GameWorker e GUI)
     private GameWorker gameWorker;
     private final Statistiche stats;
@@ -125,7 +125,7 @@ public class GamePanel extends JPanel implements GameUI {
     private JPanel createSouthContainer() {
         JPanel southContainer = new JPanel(new BorderLayout());
         southContainer.setOpaque(false);
-        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -25, 5));
+        southPlayerArea = new JPanel(new FlowLayout(FlowLayout.CENTER, -5, 5));
         southPlayerArea.setOpaque(false);
         southContainer.add(southPlayerArea, BorderLayout.CENTER);
         return southContainer;
@@ -301,7 +301,7 @@ public class GamePanel extends JPanel implements GameUI {
             }
         }
         disableCardListeners();
-        return cartaSceltaDallUmano;
+        return cartaSceltaDaUmano;
     }
 
     /**
@@ -416,7 +416,7 @@ public class GamePanel extends JPanel implements GameUI {
                 cardLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        synchronized (lock) { cartaSceltaDallUmano = carta; lock.notify(); }
+                        synchronized (lock) { cartaSceltaDaUmano = carta; lock.notify(); }
                     }
                 });
             }
@@ -459,7 +459,7 @@ public class GamePanel extends JPanel implements GameUI {
             this.setOpaque(false);
             titleLabel = new JLabel("", SwingConstants.CENTER);
             titleLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
-            titleLabel.setForeground(Color.YELLOW);
+            titleLabel.setForeground(Color.WHITE);
             titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             subtitleLabel = new JLabel("", SwingConstants.CENTER);
             subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 22));
