@@ -1,71 +1,69 @@
-Questo progetto è un'implementazione completa del classico gioco di carte italiano Tresette, sviluppata in Java con un'interfaccia grafica realizzata interamente in Swing. L'applicazione è stata creata come progetto per il corso di Metodologie di Programmazione, con un'enfasi particolare sulla corretta applicazione dei principi di ingegneria del software e dei design pattern.
+# 🃏 Tresette (Java Swing) - Implementazione Avanzata con Design Pattern
 
-Il gioco permette a un singolo utente di affrontare una partita 2 contro 2, alleandosi con un bot contro una squadra di due avversari artificiali.
 
-✨ Funzionalità Principali
-Partita Completa 2 vs 2: Gioca una partita completa di Tresette con un compagno bot contro due avversari.
 
-Intelligenza Artificiale Semplice: I bot seguono le regole fondamentali del gioco, come l'obbligo di rispondere al "palo".
+---
 
-Gestione del Profilo:
+## 🎯 Panoramica del Progetto
 
-Modifica del nickname.
+Questo repository contiene un'implementazione completa e robusta del classico gioco di carte italiano **Tresette**. Sviluppato interamente in **Java (JDK 21)**, il progetto ha rappresentato l'elaborato finale per il corso di *Metodologie di Programmazione*, con un focus primario sull'**Ingegneria del Software** e l'applicazione di **Design Pattern** per una manutenzione e scalabilità ottimali.
 
-Personalizzazione dell'avatar tramite caricamento di un'immagine dal computer.
+Il gioco permette a un utente di allearsi con un bot in una sfida 2 vs 2 contro due avversari artificiali.
 
-Statistiche persistenti (partite giocate, vinte e perse) salvate su un file stats.json.
+---
 
-Sistema di Livelli: Il livello del giocatore aumenta in base al numero di partite vinte, fornendo un senso di progressione.
+## ✨ Funzionalità del Gioco
 
-Interfaccia Grafica Personalizzata: Tutti i componenti, dai pannelli ai checkbox, sono stati personalizzati con immagini per un'esperienza di gioco più coinvolgente.
+L'applicazione offre un'esperienza di gioco coinvolgente grazie a un'interfaccia utente riccamente personalizzata:
 
-Feedback Audio e Visivo:
+* **Partite 2 vs 2 Complete:** Gioco fedele alle regole del Tresette in modalità a squadre.
+* **IA Essenziale:** I bot seguono le regole base di gioco, incluse le priorità e l'obbligo di "rispondere al palo".
+* **Interfaccia Utente Coinvolgente:** Tutti i componenti grafici (pannelli, pulsanti, ecc.) sono stati personalizzati con asset grafici dedicati.
+* **Feedback Immersivo:** Include **musica di sottofondo** ed **effetti sonori** per le prese e le azioni, con controlli dedicati per l'attivazione/disattivazione.
+* **Gestione del Profilo e Progressione:**
+    * Statistiche persistenti (Vittorie/Sconfitte/Giocate) salvate in `stats.json`.
+    * Sistema di **livelli** basato sulle partite vinte.
+    * Personalizzazione del **nickname** e dell'**avatar**.
 
-Musica di sottofondo ed effetti sonori per le azioni di gioco.
+---
 
-Controlli per attivare/disattivare musica ed effetti.
+## 🏛️ Architettura e Ingegneria del Software
 
-Un pannello a comparsa a fine mano mostra chi ha vinto la presa.
+Il codice è stato strutturato rigorosamente per garantire la **separazione delle responsabilità** e l'estensibilità:
 
-Un pannello finale annuncia la squadra vincitrice.
+### 🧱 Pattern Architetturale: Model-View-Controller (MVC)
 
-🏛️ Architettura e Design Pattern
-Il progetto è stato sviluppato seguendo rigorosamente il pattern architetturale Model-View-Controller (MVC) per garantire una netta separazione delle responsabilità.
+Abbiamo garantito un disaccoppiamento netto dei tre strati:
 
-Model: Contiene il cuore del gioco. Le classi Partita2v2, Carta, Mazzo, BotPlayer, Strategia e Statistiche gestiscono le regole, i dati e la logica di business, senza alcun legame con l'interfaccia grafica.
+| Layer | Componenti Chiave | Responsabilità |
+| :--- | :--- | :--- |
+| **Model** | `Partita2v2`, `Carta`, `Strategia`, `Statistiche` | Logica pura del gioco, regole, dati e stato, totalmente agnostico dalla UI. |
+| **View** | `MainMenu`, `GamePanel`, `ProfilePanel` (tutti in Swing) | Visualizzazione dei dati e gestione degli eventi utente (click), senza alcuna logica di gioco. |
+| **Controller** | `JTresette` (avvio), `GiocatoreUmano` | Fa da ponte, traducendo gli input della View in modifiche al Model. |
 
-View: Contiene tutte le classi dell'interfaccia grafica realizzate in Swing, come MainMenu, GamePanel, ProfilePanel e SettingPanel. Il suo unico scopo è mostrare i dati e catturare l'input dell'utente.
+### 🛠️ Design Pattern Implementati
 
-Controller: Funge da ponte tra la View e il Model. Classi come JTresette (che avvia l'app) e GiocatoreUmano (che traduce i click in mosse) rientrano in questo layer.
+L'applicazione implementa diversi Design Pattern per risolvere problemi di progettazione specifici:
 
-Sono stati inoltre implementati i seguenti Design Pattern:
+* **Observer:** Utilizzato per il *refresh automatico* dell'interfaccia (`GamePanel` come Observer) in risposta agli eventi di gioco (`Partita2v2` come Observable), mantenendo il disaccoppiamento.
+* **Singleton:** Garantisce un'unica istanza centrale (`AudioManager`) per la gestione e il controllo di tutte le risorse audio del gioco.
+* **Strategy:** Utilizzato per separare l'algoritmo decisionale del bot (`Strategia`) dalla sua esecuzione (`BotPlayer`), rendendo facile l'implementazione di nuove logiche di IA.
+* **Facade:** La classe `Partita` semplifica l'interazione del Controller con la complessa logica interna di `Partita2v2`.
 
-Observer: Per disaccoppiare il GamePanel (Observer) dalla logica di gioco Partita2v2 (Observable), permettendo alla UI di aggiornarsi in tempo reale.
+---
 
-Singleton: Utilizzato nella classe AudioManager per garantire un unico punto di controllo per tutte le risorse audio.
+## 🚀 Come Eseguire il Progetto
 
-Strategy: Implementato per separare l'algoritmo decisionale (Strategia) dal BotPlayer, rendendo l'IA facilmente estensibile.
+### Prerequisiti
 
-Facade: La classe Partita agisce come una facciata semplice per la logica più complessa contenuta in Partita2v2.
+* **JDK 21** o versione successiva installata.
 
-🛠️ Tecnologie Utilizzate
-Linguaggio: Java (JDK 21)
+### Setup e Avvio
 
-Interfaccia Grafica: Java Swing
+1.  **Librerie:** Assicurati che la libreria di serializzazione JSON (`org.json`) sia inclusa nel tuo classpath, preferibilmente posizionata in una cartella `lib/` alla radice del progetto.
+2.  **Esecuzione:** Compila ed esegui la classe principale.
 
-Gestione Dati: Libreria org.json per la serializzazione in JSON.
-
-Audio: API standard javax.sound.sampled.
-
-🚀 Come Eseguire il Progetto
-Prerequisiti:
-
-Avere installato un JDK (Java Development Kit) versione 21 o superiore.
-
-Librerie:
-
-Assicurarsi che la libreria json.jar sia inclusa nel classpath del progetto. La configurazione standard prevede di inserirla in una cartella lib/ alla radice del progetto.
-
-Avvio:
-
-Compilare ed eseguire la classe JTresette.java che contiene il metodo main.
+```bash
+# Esegui (Esempio tipico, usa il tuo IDE preferito per il setup del classpath)
+$ javac -cp lib/json.jar *.java 
+$ java -cp .:lib/json.jar JTresette
